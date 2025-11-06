@@ -24,18 +24,35 @@ git push -u origin master
 git clone https://github.com/YOUR_USERNAME/YOUR_REPO_NAME.git
 cd YOUR_REPO_NAME
 
-# Initialize and update submodules
+# Initialize and update submodules (this will take several minutes)
 git submodule update --init --recursive
 
-# Set up the build environment
-./setup-build.sh
+# Set up the build environment for your target platform
+./setup-build.sh [beaglebone|raspberrypi4|jetson-nano]
 
-# Or manually:
-source poky/oe-init-build-env build-beaglebone
-
-# Restore configuration files
-./restore-config.sh
+# Examples:
+./setup-build.sh raspberrypi4    # For Raspberry Pi 4
+./setup-build.sh jetson-nano     # For Jetson Nano
+./setup-build.sh                 # For BeagleBone (default)
 
 # Start building
+bitbake core-image-minimal
+```
+
+## Manual Setup (Alternative):
+
+```bash
+# Choose your platform
+PLATFORM=raspberrypi4
+
+# Source Yocto environment
+source poky/oe-init-build-env build-${PLATFORM}
+
+# Restore platform configuration
+cd ..
+./restore-config.sh ${PLATFORM}
+cd build-${PLATFORM}
+
+# Build
 bitbake core-image-minimal
 ```
