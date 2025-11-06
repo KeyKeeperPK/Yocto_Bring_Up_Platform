@@ -6,3 +6,11 @@
 	path = meta-openembedded
 	url = https://github.com/openembedded/meta-openembedded.git
 	branch = kirkstone
+[submodule "meta-raspberrypi"]
+	path = meta-raspberrypi
+	url = https://github.com/agherzan/meta-raspberrypi.git
+	branch = kirkstone
+[submodule "meta-tegra"]
+	path = meta-tegra
+	url = https://github.com/OE4T/meta-tegra.git
+	branch = kirkstone-l4t-r32.7.x

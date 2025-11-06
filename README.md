@@ -1,13 +1,22 @@
-# Yocto BeagleBone Build Project
+# Multi-Platform Yocto Build Project
 
-This repository contains the Yocto Project setup for building custom Linux images for BeagleBone devices.
+This repository contains the Yocto Project setup for building custom Linux images for multiple embedded platforms:
+
+- **BeagleBone** (ARM Cortex-A8)
+- **Raspberry Pi 4** (ARM Cortex-A72 64-bit)
+- **NVIDIA Jetson Nano** (ARM Cortex-A57 with GPU acceleration)
 
 ## Project Structure
 
 - `poky/` - The core Yocto Project repository (submodule)
 - `meta-openembedded/` - Additional OpenEmbedded layers (submodule)
-- `build-beaglebone/` - Build directory (excluded from Git)
-- `build-beaglebone/conf/` - Build configuration files
+- `meta-raspberrypi/` - Raspberry Pi BSP layer (submodule)
+- `meta-tegra/` - NVIDIA Jetson/Tegra BSP layer (submodule)
+- `conf-templates/` - Platform-specific configuration templates
+  - `beaglebone/` - BeagleBone configuration
+  - `raspberrypi4/` - Raspberry Pi 4 configuration
+  - `jetson-nano/` - Jetson Nano configuration
+- `build-[platform]/` - Build directories (excluded from Git)
 
 ## Setup Instructions
 
@@ -22,9 +31,16 @@ This repository contains the Yocto Project setup for building custom Linux image
    git submodule update --init --recursive
    ```
 
-3. Set up the build environment:
+3. Set up the build environment for your target platform:
    ```bash
-   source poky/oe-init-build-env build-beaglebone
+   # For BeagleBone (default)
+   ./setup-build.sh beaglebone
+   
+   # For Raspberry Pi 4
+   ./setup-build.sh raspberrypi4
+   
+   # For Jetson Nano
+   ./setup-build.sh jetson-nano
    ```
 
 4. Build the minimal image:
@@ -32,47 +48,94 @@ This repository contains the Yocto Project setup for building custom Linux image
    bitbake core-image-minimal
    ```
 
-## Configuration
+### Alternative Manual Setup
 
-### Machine Configuration
-- Target: `beaglebone-yocto`
-- Architecture: ARM Cortex-A8
-- Configured in: `build-beaglebone/conf/local.conf`
+If you prefer manual setup:
+```bash
+# Choose your platform: beaglebone, raspberrypi4, or jetson-nano
+PLATFORM=raspberrypi4
 
-### Build Optimizations
-The build is configured with:
+# Source Yocto environment
+source poky/oe-init-build-env build-${PLATFORM}
+
+# Restore platform configuration
+cd ..
+./restore-config.sh ${PLATFORM} build-${PLATFORM}
+cd build-${PLATFORM}
+
+# Build
+bitbake core-image-minimal
+```
+
+## Supported Platforms
+
+### BeagleBone
+- **Target**: `beaglebone-yocto`
+- **Architecture**: ARM Cortex-A8
+- **Features**: Basic embedded Linux with U-Boot
+- **Build directory**: `build-beaglebone/`
+
+### Raspberry Pi 4
+- **Target**: `raspberrypi4-64`
+- **Architecture**: ARM Cortex-A72 64-bit
+- **Features**: GPU acceleration, WiFi/Bluetooth, hardware interfaces
+- **Build directory**: `build-raspberrypi4/`
+
+### NVIDIA Jetson Nano
+- **Target**: `jetson-nano-devkit`
+- **Architecture**: ARM Cortex-A57 with NVIDIA GPU
+- **Features**: CUDA support, TensorRT, computer vision libraries
+- **Build directory**: `build-jetson-nano/`
+
+## Build Optimizations
+All platforms are configured with:
 - Limited parallel jobs to avoid race conditions
 - Clock skew fixes for virtualized environments
-- Optimized settings for binutils and QEMU builds
+- Platform-specific optimizations
 
 ## Output
 
 Built images will be available in:
 ```
-build-beaglebone/tmp/deploy/images/beaglebone-yocto/
+build-[platform]/tmp/deploy/images/[machine]/
 ```
 
-Key files:
-- `core-image-minimal-beaglebone-yocto.wic` - Flashable SD card image
-- `u-boot.img` - Bootloader
-- `zImage` - Linux kernel
+### Common Output Files
+- `core-image-minimal-[machine].wic` - Flashable SD card image
+- `core-image-minimal-[machine].tar.bz2` - Root filesystem archive
+- Bootloader files (U-Boot for BeagleBone/RPi, L4T for Jetson)
+- Linux kernel (`zImage` or `Image`)
 - Device tree files (`.dtb`)
 
 ## Flashing to SD Card
 
+### BeagleBone & Raspberry Pi 4
 ```bash
-sudo dd if=core-image-minimal-beaglebone-yocto.wic of=/dev/sdX bs=1M status=progress
+sudo dd if=core-image-minimal-[machine].wic of=/dev/sdX bs=1M status=progress
 sync
 ```
 
-Replace `/dev/sdX` with your SD card device.
+### Jetson Nano
+For Jetson Nano, you'll typically need to use NVIDIA's flashing tools or the generated `.wic` image with the Jetson flash utility.
+
+## Platform Comparison
+
+| Feature | BeagleBone | Raspberry Pi 4 | Jetson Nano |
+|---------|------------|----------------|-------------|
+| CPU | ARM Cortex-A8 | ARM Cortex-A72 64-bit | ARM Cortex-A57 |
+| RAM | 512MB | 1GB-8GB | 4GB |
+| GPU | None | VideoCore VI | NVIDIA Maxwell 128-core |
+| WiFi/BT | Optional | Built-in | Built-in |
+| AI/ML | Limited | Basic | CUDA/TensorRT |
+| Use Case | Basic IoT | General purpose | AI/Computer Vision |
 
 ## Build Requirements
 
 - Ubuntu 20.04+ or equivalent
-- At least 90GB free disk space
-- 8GB+ RAM recommended
+- At least 120GB free disk space (40GB per platform)
+- 8GB+ RAM recommended (16GB for Jetson builds)
 - Required packages: `lz4`, `zstd`
+- For Jetson: Accept NVIDIA licenses in configuration
 
 ## Troubleshooting
 
