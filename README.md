@@ -68,7 +68,6 @@ This repository contains the Yocto Project setup for building custom Linux image
 ./build.sh [platform] [image] [options]
 
 # Examples
-./setup-build.sh raspberrypi4 --build=core-image-base
 ./build.sh jetson-nano core-image-minimal --clean --verbose
 ./build.sh beaglebone --package=u-boot --force
 ```

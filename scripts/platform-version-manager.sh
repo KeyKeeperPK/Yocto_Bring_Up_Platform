@@ -6,9 +6,15 @@
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 META_CUSTOM_DIR="$SCRIPT_DIR/meta-custom"
 
+# Source PK Logo Class
+source "$SCRIPT_DIR/pk-logo-class.sh"
+
 # Version information
 BEAGLEBONE_VERSION="1.0.0"
 RPI4_VERSION="1.0.0"
+
+# Display PK Logo
+pk_logo_show "popup" "neon" "Platform Kit" "Version Manager"
 
 echo "=========================================="
 echo "Platform Hardware Init Version Manager"

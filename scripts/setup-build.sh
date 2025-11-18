@@ -4,6 +4,10 @@
 
 set -e
 
+# Source PK Logo Class
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+source "$SCRIPT_DIR/pk-logo-class.sh"
+
 # Supported platforms
 PLATFORMS=("beaglebone" "raspberrypi4" "jetson-nano")
 
@@ -82,6 +86,9 @@ if [[ ! " ${PLATFORMS[@]} " =~ " ${PLATFORM} " ]]; then
     usage
     exit 1
 fi
+
+# Display PK Logo
+pk_logo_show "popup" "gradient" "Platform Kit" "Yocto Build Setup"
 
 echo "Setting up Yocto build environment for $PLATFORM..."
 if [ "$START_BUILD" = true ]; then
