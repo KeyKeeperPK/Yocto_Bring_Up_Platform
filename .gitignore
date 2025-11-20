@@ -68,3 +68,7 @@ deploy/
 
 # Ignore workspace metadata
 .bitbake/
+
+# temp config 
+
+*.bak
