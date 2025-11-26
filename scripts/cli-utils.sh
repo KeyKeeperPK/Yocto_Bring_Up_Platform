@@ -138,7 +138,7 @@ system_doctor() {
     
     # Tool dependencies
     print_subheader "Tool Dependencies:"
-    local tools=("git" "python3" "gcc" "make" "chrpath" "diffstat" "gawk")
+    local tools=("git" "python3" "gcc" "make" "chrpath" "diffstat" "gawk" "pzstd")
     for tool in "${tools[@]}"; do
         if command -v "$tool" >/dev/null 2>&1; then
             print_success "$tool: Available"

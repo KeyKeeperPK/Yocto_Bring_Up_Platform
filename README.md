@@ -12,6 +12,7 @@ This repository contains the Yocto Project setup for building custom Linux image
 - `meta-openembedded/` - Additional OpenEmbedded layers (submodule)
 - `meta-raspberrypi/` - Raspberry Pi BSP layer (submodule)
 - `meta-tegra/` - NVIDIA Jetson/Tegra BSP layer (submodule)
+- `meta-virtualization/` - Virtualize BSP layer (submodule)
 - `conf-templates/` - Platform-specific configuration templates
   - `beaglebone/` - BeagleBone configuration
   - `raspberrypi4/` - Raspberry Pi 4 configuration
@@ -34,42 +35,21 @@ This repository contains the Yocto Project setup for building custom Linux image
 3. Set up and build in one step:
    ```bash
    # Setup and build automatically
-   ./setup-build.sh raspberrypi4 --build
-   
-   # Setup only (manual build later)
-   ./setup-build.sh raspberrypi4
-   
-   # Clean build
-   ./setup-build.sh jetson-nano --clean --build
-   ```
-
-4. Or use the advanced build script:
-   ```bash
-   # Advanced build with monitoring
-   ./build.sh raspberrypi4 core-image-minimal
-   
-   # Build with options
-   ./build.sh jetson-nano core-image-base --clean --sdk
-   
-   # Build specific package only
-   ./build.sh beaglebone --package=linux-yocto
+   ./build.sh
    ```
 
 ### Available Scripts
 
-- **`setup-build.sh`** - Quick setup and optional build
 - **`build.sh`** - Advanced build script with monitoring and options
 
 ### Build Script Options
 
 ```bash
-# Basic usage
-./setup-build.sh [platform] [--build] [--clean]
-./build.sh [platform] [image] [options]
+# Basic usage just using build.sh
+./build.sh
 
 # Examples
-./build.sh jetson-nano core-image-minimal --clean --verbose
-./build.sh beaglebone --package=u-boot --force
+./build.sh
 ```
 
 ## Supported Platforms

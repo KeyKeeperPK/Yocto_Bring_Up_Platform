@@ -9,6 +9,7 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 # Source dependencies
 source "$SCRIPT_DIR/scripts/pk-logo-class.sh"
 source "$SCRIPT_DIR/scripts/cli-core.sh"
+source "$SCRIPT_DIR/scripts/cli-utils.sh"
 
 # Terminal UI Colors and Formatting
 declare -A UI_COLORS=(

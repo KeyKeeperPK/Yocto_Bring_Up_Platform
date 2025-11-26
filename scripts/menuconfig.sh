@@ -35,7 +35,8 @@ show_main_menu() {
     echo "  5) Source Management"
     echo "  6) System Status"
     echo "  7) Flash to SD Card"
-    echo "  8) Clean Build"
+    echo "  8) Utils Check"
+    echo "  9) Clean Build"
     echo "  0) Exit"
     echo ""
     echo -n "Enter choice [0-8]: "
@@ -221,7 +222,82 @@ main() {
                     fi
                 fi
                 ;;
-            8)  # Clean
+            8)  # check utils
+                show_platform_menu
+                read platform_choice
+                platform=$(get_platform $platform_choice)
+                if [[ -n "$platform" ]]; then
+                    # Source required dependencies
+                    source "$SCRIPT_DIR/pk-logo-class.sh"
+                    source "$SCRIPT_DIR/cli-core.sh"
+                    source "$SCRIPT_DIR/cli-utils.sh"
+                    execute_command "Check $platform utils" \
+                        "cli_utils_command check"
+                    
+                    # Offer to fix missing dependencies
+                    echo ""
+                    echo -e "${C_MENU}Would you like to install missing dependencies? (y/N): ${C_RESET}"
+                    read -p "" fix_confirm
+                    if [[ "$fix_confirm" =~ ^[Yy]$ ]]; then
+                        show_header
+                        echo -e "${C_INFO}Installing missing dependencies from requirements.txt...${C_RESET}"
+                        echo ""
+                        
+                        # Read requirements.txt and check for missing tools
+                        local requirements_file="$PROJECT_ROOT/requirements.txt"
+                        if [[ ! -f "$requirements_file" ]]; then
+                            echo -e "${C_ERROR}requirements.txt not found!${C_RESET}"
+                            read -p "Press Enter to continue..."
+                            continue
+                        fi
+                        
+                        local missing_tools=()
+                        while IFS= read -r line || [[ -n "$line" ]]; do
+                            # Skip comments and empty lines
+                            [[ "$line" =~ ^#.*$ ]] && continue
+                            [[ -z "$line" ]] && continue
+                            
+                            local tool=$(echo "$line" | xargs)  # Trim whitespace
+                            
+                            # Check if tool is installed
+                            if ! command -v "$tool" >/dev/null 2>&1 && ! dpkg -l | grep -q "^ii  $tool "; then
+                                missing_tools+=("$tool")
+                            fi
+                        done < "$requirements_file"
+                        
+                        if [ ${#missing_tools[@]} -gt 0 ]; then
+                            echo -e "${C_INFO}Missing packages: ${missing_tools[*]}${C_RESET}"
+                            echo ""
+                            
+                            # Detect package manager and install
+                            if command -v apt-get >/dev/null 2>&1; then
+                                echo "Using apt-get..."
+                                sudo apt-get update
+                                sudo apt-get install -y "${missing_tools[@]}"
+                            elif command -v dnf >/dev/null 2>&1; then
+                                echo "Using dnf..."
+                                sudo dnf install -y "${missing_tools[@]}"
+                            elif command -v yum >/dev/null 2>&1; then
+                                echo "Using yum..."
+                                sudo yum install -y "${missing_tools[@]}"
+                            else
+                                echo -e "${C_ERROR}No supported package manager found${C_RESET}"
+                                echo "Please install manually: ${missing_tools[*]}"
+                            fi
+                            
+                            echo ""
+                            echo -e "${C_INFO}✓ Installation complete${C_RESET}"
+                        else
+                            echo -e "${C_INFO}All required tools are already installed${C_RESET}"
+                        fi
+                        
+                        echo ""
+                        read -p "Press Enter to continue..."
+                    fi
+                fi
+                ;;
+
+            9)  # Clean
                 show_platform_menu
                 read platform_choice
                 platform=$(get_platform $platform_choice)
