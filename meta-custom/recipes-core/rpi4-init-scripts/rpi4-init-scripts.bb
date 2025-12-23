@@ -11,14 +11,18 @@ PR = "r0"
 
 COMPATIBLE_MACHINE = "raspberrypi4-64"
 
+FILESEXTRAPATHS:prepend := "${THISDIR}/${PN}:"
+
 SRC_URI = " \
     file://rpi4-hardware-init.sh \
     file://rpi4-can-setup.sh \
+    file://can.cfg \
     file://rpi4-uart-setup.sh \
     file://rpi4-spi-setup.sh \
     file://rpi4-hardware-init.service \
     file://rpi4-can-fd-support.patch;apply=yes \
     file://rpi4-docker-optimization.patch;apply=yes \
+    file://rpi4-hardware-init.tmpfiles \
     "
 
 S = "${WORKDIR}"
@@ -32,7 +36,6 @@ do_install() {
     install -d ${D}${bindir}
     install -d ${D}${systemd_unitdir}/system
     install -d ${D}${sysconfdir}/rpi4
-    install -d ${D}${localstatedir}/log
     
     # Install scripts with rpi4 prefix
     install -m 0755 ${WORKDIR}/rpi4-hardware-init.sh ${D}${bindir}/
@@ -42,13 +45,14 @@ do_install() {
     
     # Install systemd service
     install -m 0644 ${WORKDIR}/rpi4-hardware-init.service ${D}${systemd_unitdir}/system/
+
+    # tmpfiles.d
+    install -d ${D}${sysconfdir}/tmpfiles.d
+    install -m 0644 ${WORKDIR}/rpi4-hardware-init.tmpfiles ${D}${sysconfdir}/tmpfiles.d/
     
     # Create RPi4 configuration directory
     echo "Raspberry Pi 4 Industrial Configuration v${PV}-${PR}" > ${D}${sysconfdir}/rpi4/version
     echo "Features: SSH, WiFi, Docker, CAN-FD, UART, SPI, Ethernet" >> ${D}${sysconfdir}/rpi4/version
-    
-    # Create log directory
-    touch ${D}${localstatedir}/log/hardware-init.log
 }
 
 FILES:${PN} += " \
@@ -58,7 +62,6 @@ FILES:${PN} += " \
     ${bindir}/rpi4-spi-setup.sh \
     ${systemd_unitdir}/system/rpi4-hardware-init.service \
     ${sysconfdir}/rpi4/version \
-    ${localstatedir}/log/hardware-init.log \
     "
 
 PROVIDES = "raspberrypi4-init-scripts"

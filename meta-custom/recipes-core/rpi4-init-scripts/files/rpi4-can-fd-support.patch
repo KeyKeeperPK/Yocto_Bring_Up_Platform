@@ -1,6 +1,6 @@
 --- a/rpi4-can-setup.sh
 +++ b/rpi4-can-setup.sh
-@@ -18,6 +18,30 @@ modprobe mcp251xfd
+@@ -27,6 +27,34 @@ modprobe mcp251xfd
  # Configure CAN0 interface (MCP2515 on SPI0.0)
  if [ -d /sys/class/net/can0 ]; then
      # Try to configure with CAN-FD first, fallback to classic CAN
@@ -31,6 +31,10 @@
 +            log_message "CAN0 configured with classic CAN: 500kbps"
 +        fi
 +    fi
-     
-     ip link set up can0
-     log_message "CAN0 interface is up"
++
+     if ip link set can0 type can bitrate 500000 dbitrate 2000000 fd on 2>/dev/null; then
+         log_message "CAN0 configured with CAN-FD: 500kbps/2Mbps"
+     else
+         ip link set can0 type can bitrate 500000
+         log_message "CAN0 configured with classic CAN: 500kbps"
+     fi

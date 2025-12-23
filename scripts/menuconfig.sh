@@ -122,7 +122,7 @@ main() {
                 platform=$(get_platform $platform_choice)
                 if [[ -n "$platform" ]]; then
                     execute_command "Update Configuration for $platform" \
-                        "'$SCRIPT_DIR/pk-cli-original.sh' config '$platform'"
+                        "'$SCRIPT_DIR/pk-cli-original.sh' config update '$platform'"
                 fi
                 ;;
             4)  # Kernel
