@@ -1,0 +1,7 @@
+# Custom overlays for Raspberry pi 
+cmdline=cmdline.txt
+
+dtparam=spi=on
+dtparam=watchdog=on
+
+dtoverlay=mcp251xfd,spi0-0,oscillator=40000000,interrupt=25 

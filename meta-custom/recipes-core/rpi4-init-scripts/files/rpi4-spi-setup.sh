@@ -84,7 +84,7 @@ cat > /etc/spi/interfaces <<EOF
 EOF
 
 # Create SPI test utility
-cat > /usr/local/bin/spi-test <<'EOF'
+cat > /usr/bin/spi-test <<'EOF'
 #!/bin/bash
 # SPI testing utility for Raspberry Pi 4
 
@@ -134,10 +134,10 @@ else
 fi
 EOF
 
-chmod +x /usr/local/bin/spi-test
+chmod +x /usr/bin/spi-test
 
 # Create SPI speed test utility
-cat > /usr/local/bin/spi-speed-test <<'EOF'
+cat > /usr/bin/spi-speed-test <<'EOF'
 #!/bin/bash
 # SPI speed testing utility
 
@@ -170,11 +170,11 @@ for speed in "${SPEEDS[@]}"; do
 done
 EOF
 
-chmod +x /usr/local/bin/spi-speed-test
+chmod +x /usr/bin/spi-speed-test
 
 log_message "Created SPI test utilities:"
-log_message "  /usr/local/bin/spi-test - Basic SPI testing"
-log_message "  /usr/local/bin/spi-speed-test - Speed testing"
+log_message "  /usr/bin/spi-test - Basic SPI testing"
+log_message "  /usr/bin/spi-speed-test - Speed testing"
 log_message "Raspberry Pi 4 SPI setup completed"
 log_message "Configuration file: /etc/spi/interfaces"
 log_message "Available tools: spitools, spi-test, spi-speed-test"

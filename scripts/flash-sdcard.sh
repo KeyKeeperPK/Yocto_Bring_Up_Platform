@@ -199,8 +199,7 @@ find_image() {
 # Find bmap file
 find_bmap() {
     local image_file="$1"
-    local bmap_file="${image_file%.bz2}.bmap"
-    bmap_file="${bmap_file%.gz}.bmap"
+    bmap_file="${image_file%.bz2}.bmap"
     
     if [[ -f "$bmap_file" ]]; then
         echo "$bmap_file"
@@ -349,8 +348,10 @@ main() {
     
     # Flash image
     echo ""
+    print_info "Searching for imabmap file..."
     if $USE_BMAP && command -v bmaptool &>/dev/null; then
         BMAP_FILE=$(find_bmap "$IMAGE_FILE")
+        print_info "Found bmap: ${BMAP_FILE}"
         flash_with_bmap "$IMAGE_FILE" "$BMAP_FILE" "$DEVICE"
     else
         if $USE_BMAP && ! command -v bmaptool &>/dev/null; then

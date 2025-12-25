@@ -7,7 +7,7 @@ DefaultDependencies=false
 
 [Service]
 Type=oneshot
-ExecStart=/usr/local/bin/rpi4-hardware-init.sh
+ExecStart=/usr/bin/rpi4-hardware-init.sh
 RemainAfterExit=yes
 StandardOutput=journal
 StandardError=journal

@@ -93,6 +93,8 @@ execute_build() {
     local show_logs="$7"
     
     local build_dir="build-$platform"
+    local deploy_dir="tmp/deploy/images"
+    local machine_dir=$(ls "$deploy_dir" | head -1)
     local start_time=$(date +%s)
     local original_dir="$(pwd)"
     
@@ -145,6 +147,33 @@ execute_build() {
     else
         execute_build_simple "$build_cmd" "$platform" "$image" "$start_time" "$show_logs"
         build_result=$?
+    fi
+
+    # Navigate to deploy directory and create bmap file
+    if [ $build_result -eq 0 ]; then
+        if [ -d "$deploy_dir" ]; then
+            local actual_machine_dir=$(ls "$deploy_dir" 2>/dev/null | head -1)
+            if [ -n "$actual_machine_dir" ] && [ -d "$deploy_dir/$actual_machine_dir" ]; then
+                # Change to the deploy directory
+                if cd "$deploy_dir/$actual_machine_dir" 2>/dev/null; then
+                    # Find .wic file and create bmap
+                    local wic_file=$(ls *${actual_machine_dir}.wic 2>/dev/null | head -1)
+                    if [ -n "$wic_file" ]; then
+                        print_info "Creating bmap file for $wic_file..."
+                        if command -v bmaptool >/dev/null 2>&1; then
+                            bmaptool create -o "${wic_file}.bmap" "$wic_file"
+                            if [ $? -eq 0 ]; then
+                                print_success "Bmap file created: ${wic_file}.bmap"
+                            else
+                                print_error "Failed to create bmap file"
+                            fi
+                        else
+                            print_error "bmaptool not found. Install with: pip install bmap-tools"
+                        fi
+                    fi
+                fi
+            fi
+        fi
     fi
     
     # Return to original directory
