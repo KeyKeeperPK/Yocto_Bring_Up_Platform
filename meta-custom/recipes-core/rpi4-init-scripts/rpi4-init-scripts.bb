@@ -17,8 +17,6 @@ SRC_URI = " \
     file://rpi4-hardware-init.sh \
     file://rpi4-can-setup.sh \
     file://can.cfg \
-    file://config.txt.append \
-    file://network_dhcpcd.conf \
     file://rpi4-uart-setup.sh \
     file://rpi4-spi-setup.sh \
     file://rpi4-hardware-init.service \
@@ -51,25 +49,10 @@ do_install() {
     # tmpfiles.d
     install -d ${D}${sysconfdir}/tmpfiles.d
     install -m 0644 ${WORKDIR}/rpi4-hardware-init.tmpfiles ${D}${sysconfdir}/tmpfiles.d/
-
-    # Insall ethernet dhcpcd conf
-    install -d ${D}${sysconfdir}
-    install -m 0644 ${WORKDIR}/network_dhcpcd.conf ${D}${sysconfdir}/network_dhcpcd.conf
     
     # Create RPi4 configuration directory
     echo "Raspberry Pi 4 Industrial Configuration v${PV}-${PR}" > ${D}${sysconfdir}/rpi4/version
     echo "Features: SSH, WiFi, Docker, CAN-FD, UART, SPI, Ethernet" >> ${D}${sysconfdir}/rpi4/version
-}
-
-do_deploy:append() {
-    CFG = "${TOPDIR}/build-raspberrypi4/tmp/deploy/images/raspberrypi4-64/bootfiles/config.txt"
-
-    if [ -f "$CFG" ]; then 
-        bbnote "Appending can dtoverlays line to $CFG"
-        cat "${WORKDIR}/config.txt.append" >> "$CFG"
-    else
-        bbwarn "No CFG found"
-    fi
 }
 
 FILES:${PN} += " \
@@ -79,7 +62,6 @@ FILES:${PN} += " \
     ${bindir}/rpi4-spi-setup.sh \
     ${systemd_unitdir}/system/rpi4-hardware-init.service \
     ${sysconfdir}/rpi4/version \
-    ${sysconfdir}/network_dhcpcd.conf \
     "
 
 PROVIDES = "raspberrypi4-init-scripts"
