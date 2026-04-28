@@ -216,7 +216,8 @@ show_interactive_menu() {
 show_platform_menu() {
     local platforms=(
         "beaglebone:BeagleBone Black/Green - Industrial IoT with CAN, UART, SPI"
-        "raspberrypi4:Raspberry Pi 4 64-bit - Edge computing with Docker, WiFi, CAN-FD" 
+        "raspberrypi4:Raspberry Pi 4 64-bit - Edge computing with Docker, WiFi, CAN-FD"
+        "raspberrypi5:Raspberry Pi 5 64-bit - Higher-performance edge computing with PCIe"
         "jetson-nano:NVIDIA Jetson Nano - AI/ML workloads with GPU acceleration"
     )
     
@@ -226,7 +227,8 @@ show_platform_menu() {
     case $choice in
         0) echo "beaglebone" ;;
         1) echo "raspberrypi4" ;;
-        2) echo "jetson-nano" ;;
+        2) echo "raspberrypi5" ;;
+        3) echo "jetson-nano" ;;
         *) echo "" ;;
     esac
 }
@@ -366,7 +368,7 @@ update_build_configs() {
     
     if [[ -z "$platform" ]]; then
         echo "Usage: update_build_configs <platform>"
-        echo "Available platforms: beaglebone, raspberrypi4, jetson-nano"
+        echo "Available platforms: beaglebone, raspberrypi4, raspberrypi5, jetson-nano"
         return 1
     fi
     
@@ -419,7 +421,7 @@ update_build_configs() {
 
 # Update all platform configurations
 update_all_configs() {
-    local platforms=("beaglebone" "raspberrypi4" "jetson-nano")
+    local platforms=("beaglebone" "raspberrypi4" "raspberrypi5" "jetson-nano")
     
     print_status "Updating all platform configurations..." "info"
     echo ""
@@ -477,12 +479,14 @@ main() {
                 echo "PLATFORMS:"
                 echo "  beaglebone                   # BeagleBone Black/Green (ARM Cortex-A8)"
                 echo "  raspberrypi4                 # Raspberry Pi 4 64-bit (ARM Cortex-A72)"
+                echo "  raspberrypi5                 # Raspberry Pi 5 64-bit (ARM Cortex-A76)"
                 echo "  jetson-nano                  # NVIDIA Jetson Nano (ARM Cortex-A57)"
                 echo ""
                 echo "EXAMPLES:"
                 echo "  $0                           # Interactive mode"
                 echo "  $0 build beaglebone          # Build BeagleBone image"
                 echo "  $0 setup raspberrypi4        # Setup Raspberry Pi 4"
+                echo "  $0 setup raspberrypi5        # Setup Raspberry Pi 5"
                 echo "  $0 update-config             # Update all platform configs"
                 echo "  $0 status                    # Show system status"
                 echo ""

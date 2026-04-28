@@ -54,7 +54,7 @@ cli_build_command() {
     # Validate platform
     if ! validate_platform "$platform"; then
         print_error "Invalid platform: $platform"
-        print_info "Valid platforms: beaglebone, raspberrypi4, jetson-nano"
+        print_info "Valid platforms: beaglebone, raspberrypi4, raspberrypi5, jetson-nano"
         return 1
     fi
     
@@ -327,7 +327,8 @@ SYNTAX:
 
 PLATFORMS:
     beaglebone      BeagleBone Industrial IoT configuration
-    raspberrypi4    Raspberry Pi 4 Industrial configuration  
+    raspberrypi4    Raspberry Pi 4 Industrial configuration
+    raspberrypi5    Raspberry Pi 5 Industrial configuration
     jetson-nano     NVIDIA Jetson Nano configuration
 
 IMAGES:
@@ -345,12 +346,14 @@ OPTIONS:
 EXAMPLES:
     pk build beaglebone                     # Build minimal image
     pk build raspberrypi4 base              # Build base image
+    pk build raspberrypi5 full --clean      # Clean build of full image
     pk build jetson-nano full --clean       # Clean build of full image
     pk build beaglebone minimal --monitor   # Build with monitoring
 
 QUICK BUILDS:
     pk build beaglebone                     # ~30-60 minutes
     pk build raspberrypi4                   # ~45-90 minutes
+    pk build raspberrypi5                   # ~45-90 minutes
     pk build jetson-nano                    # ~60-120 minutes
 
 BUILD OUTPUT:

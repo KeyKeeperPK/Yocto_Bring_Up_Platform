@@ -1,27 +1,28 @@
 #!/bin/bash
 #
-# Raspberry Pi 4 Hardware Initialization Script
+# Raspberry Pi 4/5 Hardware Initialization Script
 # Industrial/IoT Configuration: SSH, WiFi, Docker, CAN/CAN-FD, UART, SPI, Ethernet
 #
 
 LOG_FILE="/var/log/hardware-init.log"
 
 log_message() {
-    echo "$(date): RPI4-HARDWARE-INIT: $1" | tee -a "$LOG_FILE"
+    echo "$(date): RPI-HARDWARE-INIT: $1" | tee -a "$LOG_FILE"
 }
 
 # Ensure log directory exists
 mkdir -p "$(dirname "$LOG_FILE")"
 
 log_message "=========================================="
-log_message "Raspberry Pi 4 Industrial Hardware Init"
+log_message "Raspberry Pi Industrial Hardware Init"
 log_message "=========================================="
 
-# Check if we're running on Raspberry Pi 4
-if grep -q "Raspberry Pi 4" /proc/cpuinfo; then
-    log_message "Confirmed: Running on Raspberry Pi 4"
+# Check if we're running on a supported Raspberry Pi model
+DEVICE_MODEL="$(tr -d '\0' </proc/device-tree/model 2>/dev/null || true)"
+if [[ "$DEVICE_MODEL" =~ Raspberry\ Pi\ [45] ]]; then
+    log_message "Confirmed: Running on $DEVICE_MODEL"
 else
-    log_message "Warning: Not running on Raspberry Pi 4"
+    log_message "Warning: Unsupported model detected: ${DEVICE_MODEL:-unknown}"
 fi
 
 # Set script directory
@@ -192,9 +193,9 @@ log_message "Setting up monitoring and diagnostics..."
 # Create system info script
 cat > /usr/local/bin/rpi4-system-info <<'EOF'
 #!/bin/bash
-# Raspberry Pi 4 System Information
+# Raspberry Pi 4/5 System Information
 
-echo "===== Raspberry Pi 4 System Information ====="
+echo "===== Raspberry Pi 4/5 System Information ====="
 echo "Hostname: $(hostname)"
 echo "Date: $(date)"
 echo "Uptime: $(uptime -p)"
@@ -251,7 +252,7 @@ log_message "Created system info utility: rpi4-system-info"
 # ===================================================================
 
 log_message "=========================================="
-log_message "Raspberry Pi 4 Hardware Initialization Complete"
+log_message "Raspberry Pi Hardware Initialization Complete"
 log_message "=========================================="
 
 log_message "Configured features:"

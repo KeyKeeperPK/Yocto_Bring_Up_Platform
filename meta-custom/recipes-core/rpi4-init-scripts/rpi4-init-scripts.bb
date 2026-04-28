@@ -1,5 +1,5 @@
-SUMMARY = "Custom Raspberry Pi 4 hardware interface initialization scripts"
-DESCRIPTION = "Scripts to initialize and configure SSH, WiFi, Ethernet, Docker, CAN, CAN-FD, UART, SPI, and Ethernet on Raspberry Pi 4"
+SUMMARY = "Custom Raspberry Pi 4/5 hardware interface initialization scripts"
+DESCRIPTION = "Scripts to initialize and configure SSH, WiFi, Ethernet, Docker, CAN, CAN-FD, UART, SPI, and Ethernet on Raspberry Pi 4 and Raspberry Pi 5"
 LICENSE = "MIT"
 LIC_FILES_CHKSUM = "file://${COMMON_LICENSE_DIR}/MIT;md5=0835ade698e0bcf8506ecda2f7b4f302"
 
@@ -9,7 +9,7 @@ RDEPENDS:${PN} = "bash docker wpa-supplicant can-utils"
 PV = "1.0.0"
 PR = "r0"
 
-COMPATIBLE_MACHINE = "raspberrypi4-64"
+COMPATIBLE_MACHINE = "(raspberrypi4-64|raspberrypi5)"
 
 FILESEXTRAPATHS:prepend := "${THISDIR}/${PN}:"
 

@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Platform-specific Hardware Initialization Version Manager
-# Handles versioning and patches for BeagleBone and Raspberry Pi 4 configurations
+# Handles versioning and patches for BeagleBone and Raspberry Pi configurations
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 META_CUSTOM_DIR="$SCRIPT_DIR/meta-custom"
@@ -33,6 +33,7 @@ show_usage() {
     echo "Platforms:"
     echo "  beaglebone         BeagleBone Black/Green industrial config"
     echo "  rpi4               Raspberry Pi 4 industrial config"
+    echo "  rpi5               Raspberry Pi 5 industrial config (shared recipe)"
     echo ""
     echo "Examples:"
     echo "  $0 status"
@@ -62,9 +63,9 @@ show_status() {
     
     # Raspberry Pi 4 status
     if [ -d "$META_CUSTOM_DIR/recipes-core/rpi4-init-scripts" ]; then
-        echo "✓ Raspberry Pi 4: v$RPI4_VERSION"
+        echo "✓ Raspberry Pi 4/5: v$RPI4_VERSION"
         echo "  Recipe: rpi4-init-scripts.bb"
-        echo "  Features: SSH, WiFi, Docker, CAN-FD, UART, SPI, Ethernet"
+        echo "  Features: SSH, WiFi, Docker, CAN-FD, UART, SPI, Ethernet, PCIe (Pi 5)"
         
         patch_count=$(ls -1 "$META_CUSTOM_DIR/recipes-core/rpi4-init-scripts/files/"*.patch 2>/dev/null | wc -l)
         echo "  Patches: $patch_count available"
@@ -86,8 +87,8 @@ show_version() {
                 grep "^PV\|^PR" "$META_CUSTOM_DIR/recipes-core/beaglebone-init-scripts/beaglebone-init-scripts.bb"
             fi
             ;;
-        rpi4)
-            echo "Raspberry Pi 4 Hardware Init Version: $RPI4_VERSION"
+        rpi4|rpi5)
+            echo "Raspberry Pi Hardware Init Version: $RPI4_VERSION"
             if [ -f "$META_CUSTOM_DIR/recipes-core/rpi4-init-scripts/rpi4-init-scripts.bb" ]; then
                 echo "Recipe file: rpi4-init-scripts.bb"
                 grep "^PV\|^PR" "$META_CUSTOM_DIR/recipes-core/rpi4-init-scripts/rpi4-init-scripts.bb"
@@ -95,7 +96,7 @@ show_version() {
             ;;
         *)
             echo "Unknown platform: $platform"
-            echo "Available platforms: beaglebone, rpi4"
+            echo "Available platforms: beaglebone, rpi4, rpi5"
             exit 1
             ;;
     esac
@@ -156,9 +157,35 @@ show_info() {
                 ls -1 "$META_CUSTOM_DIR/recipes-core/rpi4-init-scripts/files/"*.patch 2>/dev/null || echo "  None"
             fi
             ;;
+        rpi5)
+            echo "Raspberry Pi 5 Industrial Configuration"
+            echo "======================================="
+            echo "Version: $RPI4_VERSION"
+            echo "Target Machine: raspberrypi5"
+            echo "Features:"
+            echo "  • SSH server (port 22)"
+            echo "  • WiFi and Bluetooth support"
+            echo "  • Docker container platform"
+            echo "  • CAN bus with CAN-FD support"
+            echo "  • Multiple UART interfaces"
+            echo "  • Multiple SPI interfaces"
+            echo "  • PCIe support"
+            echo "  • GPIO and I2C access"
+            echo ""
+            echo "Hardware Scripts:"
+            echo "  • rpi4-hardware-init.sh - Shared Raspberry Pi initialization"
+            echo "  • rpi4-can-setup.sh - CAN/CAN-FD setup"
+            echo "  • rpi4-uart-setup.sh - UART configuration"
+            echo "  • rpi4-spi-setup.sh - SPI configuration"
+            echo ""
+            echo "Available Patches:"
+            if [ -d "$META_CUSTOM_DIR/recipes-core/rpi4-init-scripts/files" ]; then
+                ls -1 "$META_CUSTOM_DIR/recipes-core/rpi4-init-scripts/files/"*.patch 2>/dev/null || echo "  None"
+            fi
+            ;;
         *)
             echo "Unknown platform: $platform"
-            echo "Available platforms: beaglebone, rpi4"
+            echo "Available platforms: beaglebone, rpi4, rpi5"
             exit 1
             ;;
     esac
@@ -173,9 +200,9 @@ apply_patches() {
             patch_dir="$META_CUSTOM_DIR/recipes-core/beaglebone-init-scripts/files"
             echo "Applying patches for BeagleBone..."
             ;;
-        rpi4)
+        rpi4|rpi5)
             patch_dir="$META_CUSTOM_DIR/recipes-core/rpi4-init-scripts/files"
-            echo "Applying patches for Raspberry Pi 4..."
+            echo "Applying patches for Raspberry Pi..."
             ;;
         *)
             echo "Unknown platform: $platform"
@@ -206,21 +233,21 @@ case "${1:-status}" in
         ;;
     version)
         if [ -z "$2" ]; then
-            echo "Please specify a platform: beaglebone or rpi4"
+            echo "Please specify a platform: beaglebone, rpi4, or rpi5"
             exit 1
         fi
         show_version "$2"
         ;;
     info)
         if [ -z "$2" ]; then
-            echo "Please specify a platform: beaglebone or rpi4"
+            echo "Please specify a platform: beaglebone, rpi4, or rpi5"
             exit 1
         fi
         show_info "$2"
         ;;
     patch)
         if [ -z "$2" ]; then
-            echo "Please specify a platform: beaglebone or rpi4"
+            echo "Please specify a platform: beaglebone, rpi4, or rpi5"
             exit 1
         fi
         apply_patches "$2"

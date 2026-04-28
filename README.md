@@ -4,6 +4,7 @@ This repository contains the Yocto Project setup for building custom Linux image
 
 - **BeagleBone** (ARM Cortex-A8)
 - **Raspberry Pi 4** (ARM Cortex-A72 64-bit)
+- **Raspberry Pi 5** (ARM Cortex-A76 64-bit)
 - **NVIDIA Jetson Nano** (ARM Cortex-A57 with GPU acceleration)
 
 ## Project Structure
@@ -16,6 +17,7 @@ This repository contains the Yocto Project setup for building custom Linux image
 - `conf-templates/` - Platform-specific configuration templates
   - `beaglebone/` - BeagleBone configuration
   - `raspberrypi4/` - Raspberry Pi 4 configuration
+  - `raspberrypi5/` - Raspberry Pi 5 configuration
   - `jetson-nano/` - Jetson Nano configuration
 - `build-[platform]/` - Build directories (excluded from Git)
 
@@ -66,6 +68,12 @@ This repository contains the Yocto Project setup for building custom Linux image
 - **Features**: GPU acceleration, WiFi/Bluetooth, hardware interfaces
 - **Build directory**: `build-raspberrypi4/`
 
+### Raspberry Pi 5
+- **Target**: `raspberrypi5`
+- **Architecture**: ARM Cortex-A76 64-bit
+- **Features**: Higher CPU performance, PCIe, WiFi/Bluetooth, hardware interfaces
+- **Build directory**: `build-raspberrypi5/`
+
 ### NVIDIA Jetson Nano
 - **Target**: `jetson-nano-devkit`
 - **Architecture**: ARM Cortex-A57 with NVIDIA GPU
@@ -94,7 +102,7 @@ build-[platform]/tmp/deploy/images/[machine]/
 
 ## Flashing to SD Card
 
-### BeagleBone & Raspberry Pi 4
+### BeagleBone, Raspberry Pi 4 & Raspberry Pi 5
 ```bash
 sudo dd if=core-image-minimal-[machine].wic of=/dev/sdX bs=1M status=progress
 sync
@@ -105,14 +113,14 @@ For Jetson Nano, you'll typically need to use NVIDIA's flashing tools or the gen
 
 ## Platform Comparison
 
-| Feature | BeagleBone | Raspberry Pi 4 | Jetson Nano |
-|---------|------------|----------------|-------------|
-| CPU | ARM Cortex-A8 | ARM Cortex-A72 64-bit | ARM Cortex-A57 |
-| RAM | 512MB | 1GB-8GB | 4GB |
-| GPU | None | VideoCore VI | NVIDIA Maxwell 128-core |
-| WiFi/BT | Optional | Built-in | Built-in |
-| AI/ML | Limited | Basic | CUDA/TensorRT |
-| Use Case | Basic IoT | General purpose | AI/Computer Vision |
+| Feature | BeagleBone | Raspberry Pi 4 | Raspberry Pi 5 | Jetson Nano |
+|---------|------------|----------------|----------------|-------------|
+| CPU | ARM Cortex-A8 | ARM Cortex-A72 64-bit | ARM Cortex-A76 64-bit | ARM Cortex-A57 |
+| RAM | 512MB | 1GB-8GB | 4GB-8GB | 4GB |
+| GPU | None | VideoCore VI | VideoCore VII | NVIDIA Maxwell 128-core |
+| WiFi/BT | Optional | Built-in | Built-in | Built-in |
+| AI/ML | Limited | Basic | Better edge inference | CUDA/TensorRT |
+| Use Case | Basic IoT | General purpose | Higher-performance edge | AI/Computer Vision |
 
 ## Build Requirements
 

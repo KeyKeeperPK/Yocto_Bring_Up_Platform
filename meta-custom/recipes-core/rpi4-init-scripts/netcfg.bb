@@ -1,9 +1,9 @@
-SUMMARY = "Custom Raspberry Pi 4 dhcpcd network manager configuration"
-DESCRIPTION = "Scripts to config static Ethernet ip on Raspberry Pi 4"
+SUMMARY = "Custom Raspberry Pi 4/5 network manager configuration"
+DESCRIPTION = "Scripts to configure static Ethernet IP on Raspberry Pi 4 and Raspberry Pi 5"
 LICENSE = "MIT"
 LIC_FILES_CHKSUM = "file://${COMMON_LICENSE_DIR}/MIT;md5=0835ade698e0bcf8506ecda2f7b4f302"
 
-COMPATIBLE_MACHINE = "raspberrypi4-64"
+COMPATIBLE_MACHINE = "(raspberrypi4-64|raspberrypi5)"
 
 FILESEXTRAPATHS:prepend := "${THISDIR}/files:"
 

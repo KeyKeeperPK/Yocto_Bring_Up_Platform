@@ -64,6 +64,19 @@ show_platform_list() {
         echo -e "  Status: ${CLI_YELLOW}- Not configured${CLI_NC}"
     fi
     echo ""
+
+    # Raspberry Pi 5
+    echo -e "${CLI_MAGENTA}raspberrypi5${CLI_NC}"
+    echo "  Target: Raspberry Pi 5 64-bit"
+    echo "  Features: SSH, WiFi, Docker, CAN-FD, UART, SPI, Ethernet, PCIe"
+    echo "  Use case: Higher-performance edge computing"
+    echo "  Recipe: rpi4-init-scripts (shared Raspberry Pi init layer)"
+    if [ -d "build-raspberrypi5" ]; then
+        echo -e "  Status: ${CLI_GREEN}✓ Configured${CLI_NC}"
+    else
+        echo -e "  Status: ${CLI_YELLOW}- Not configured${CLI_NC}"
+    fi
+    echo ""
     
     # Jetson Nano
     echo -e "${CLI_BLUE}jetson-nano${CLI_NC}"
@@ -87,7 +100,7 @@ show_platform_info() {
     
     if [[ "$platform" == "help" || -z "$platform" ]]; then
         print_info "Usage: pk platform info [PLATFORM]"
-        print_info "Available platforms: beaglebone, raspberrypi4, jetson-nano"
+        print_info "Available platforms: beaglebone, raspberrypi4, raspberrypi5, jetson-nano"
         return
     fi
     
@@ -102,6 +115,9 @@ show_platform_info() {
             ;;
         "raspberrypi4")
             show_raspberrypi4_info
+            ;;
+        "raspberrypi5")
+            show_raspberrypi5_info
             ;;
         "jetson-nano")
             show_jetson_nano_info
@@ -221,6 +237,60 @@ show_raspberrypi4_info() {
     echo "  spi-speed-test - SPI performance benchmarking"
 }
 
+# Raspberry Pi 5 detailed info
+show_raspberrypi5_info() {
+    print_header "Raspberry Pi 5 Industrial Platform"
+    echo ""
+
+    print_subheader "Hardware Specifications:"
+    echo "  CPU: Broadcom BCM2712 ARM Cortex-A76 @ 2.4GHz (quad-core)"
+    echo "  RAM: 4GB/8GB LPDDR4X"
+    echo "  Storage: microSD card"
+    echo "  Connectivity: Gigabit Ethernet, WiFi 5, Bluetooth 5.0, USB 3.0, PCIe 2.0"
+    echo ""
+
+    print_subheader "Industrial Features:"
+    echo "  SSH server (secure remote access)"
+    echo "  WiFi and Bluetooth connectivity"
+    echo "  Docker container platform"
+    echo "  Advanced CAN-FD support with hardware detection"
+    echo "  Multiple UART interfaces"
+    echo "  Multiple SPI interfaces"
+    echo "  PCIe support for high-speed peripherals"
+    echo "  GPIO and I2C access for sensors"
+    echo ""
+
+    print_subheader "Configuration:"
+    echo "  Recipe: rpi4-init-scripts v1.0.0 (shared with Raspberry Pi 4)"
+    echo "  Machine: raspberrypi5"
+    echo "  Init system: systemd"
+    echo "  Boot flow: direct firmware boot (U-Boot disabled)"
+    echo "  Features: SSH, WiFi, Docker, CAN-FD, UART, SPI, Ethernet, PCIe"
+    echo ""
+
+    print_subheader "Build Information:"
+    if [ -d "build-raspberrypi5" ]; then
+        echo -e "  Status: ${CLI_GREEN}✓ Configured${CLI_NC}"
+        echo "  Build dir: build-raspberrypi5"
+        if [ -f "build-raspberrypi5/conf/local.conf" ]; then
+            echo "  Config: ✓ local.conf present"
+        fi
+        if [ -f "build-raspberrypi5/conf/bblayers.conf" ]; then
+            echo "  Layers: ✓ bblayers.conf present"
+        fi
+    else
+        echo -e "  Status: ${CLI_YELLOW}Not configured${CLI_NC}"
+        print_info "Run 'pk setup raspberrypi5' to configure"
+    fi
+    echo ""
+
+    print_subheader "Available Scripts:"
+    echo "  rpi4-hardware-init.sh - Shared Raspberry Pi hardware initialization"
+    echo "  rpi4-can-setup.sh - CAN/CAN-FD setup with hardware detection"
+    echo "  rpi4-uart-setup.sh - Multi-UART configuration"
+    echo "  rpi4-spi-setup.sh - Multi-bus SPI support with utilities"
+}
+
 # Jetson Nano detailed info
 show_jetson_nano_info() {
     print_header "NVIDIA Jetson Nano Platform"
@@ -273,6 +343,11 @@ show_platform_versions() {
         
         print_subheader "Raspberry Pi 4:"
         echo "  Version: 1.0.0"  
+        echo "  Recipe: rpi4-init-scripts"
+        echo ""
+
+        print_subheader "Raspberry Pi 5:"
+        echo "  Version: 1.0.0"
         echo "  Recipe: rpi4-init-scripts"
         echo ""
         
@@ -332,7 +407,7 @@ show_platform_status() {
     print_header "Platform Status Overview"
     echo ""
     
-    for platform in beaglebone raspberrypi4 jetson-nano; do
+    for platform in beaglebone raspberrypi4 raspberrypi5 jetson-nano; do
         if [ -d "build-$platform" ]; then
             echo -e "${CLI_GREEN}✓ $platform${CLI_NC} - Configured"
         else
@@ -367,7 +442,8 @@ EXAMPLES:
 
 PLATFORM DETAILS:
     beaglebone     - Industrial IoT, headless operation
-    raspberrypi4   - Edge computing, Docker support  
+    raspberrypi4   - Edge computing, Docker support
+    raspberrypi5   - Higher-performance edge computing with PCIe
     jetson-nano    - AI/ML inference, GPU acceleration
 
 EOF

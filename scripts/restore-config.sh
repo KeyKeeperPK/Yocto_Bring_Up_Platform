@@ -5,7 +5,7 @@
 set -e
 
 # Supported platforms
-PLATFORMS=("beaglebone" "raspberrypi4" "jetson-nano")
+PLATFORMS=("beaglebone" "raspberrypi4" "raspberrypi5" "jetson-nano")
 
 # Function to display usage
 usage() {

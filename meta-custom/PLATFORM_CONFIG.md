@@ -1,6 +1,6 @@
 # Platform-Specific Hardware Initialization
 
-This document describes the separated platform-specific hardware initialization configurations for BeagleBone and Raspberry Pi 4.
+This document describes the separated platform-specific hardware initialization configurations for BeagleBone and Raspberry Pi platforms.
 
 ## Overview
 
@@ -20,7 +20,7 @@ meta-custom/
 │   │       ├── beagle-hardware-init.service    # Systemd service
 │   │       └── beagle-can-fd.patch             # CAN-FD support patch
 │   └── rpi4-init-scripts/
-│       ├── rpi4-init-scripts.bb                # Raspberry Pi 4 recipe
+│       ├── rpi4-init-scripts.bb                # Raspberry Pi 4/5 recipe
 │       └── files/
 │           ├── rpi4-hardware-init.sh           # Main init script
 │           ├── rpi4-can-setup.sh               # CAN/CAN-FD setup
@@ -72,7 +72,7 @@ meta-custom/
 - GPIO and I2C access
 
 **Recipe:** `rpi4-init-scripts.bb`
-- Compatible with Raspberry Pi 4 64-bit only
+- Compatible with Raspberry Pi 4 64-bit and Raspberry Pi 5
 - Versioned with PV/PR support
 - Includes CAN-FD and Docker optimization patches
 
@@ -127,7 +127,7 @@ IMAGE_INSTALL:append = " beaglebone-init-scripts"
 
 ### Raspberry Pi 4 Build
 
-Update `conf-templates/raspberrypi4/local.conf`:
+Update `conf-templates/raspberrypi4/local.conf` or `conf-templates/raspberrypi5/local.conf`:
 ```
 IMAGE_INSTALL:append = " rpi4-init-scripts"
 ```

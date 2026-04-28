@@ -9,7 +9,7 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 source "$SCRIPT_DIR/pk-logo-class.sh"
 
 # Supported platforms
-PLATFORMS=("beaglebone" "raspberrypi4" "jetson-nano")
+PLATFORMS=("beaglebone" "raspberrypi4" "raspberrypi5" "jetson-nano")
 
 # Default image to build
 DEFAULT_IMAGE="core-image-minimal"
@@ -31,6 +31,7 @@ usage() {
     echo "Examples:"
     echo "  $0 raspberrypi4                    # Setup only"
     echo "  $0 raspberrypi4 --build            # Setup and build core-image-minimal"
+    echo "  $0 raspberrypi5 --build=core-image-base # Setup and build specific image"
     echo "  $0 jetson-nano --build=core-image-base # Setup and build specific image"
     echo "  $0 beaglebone --clean --build      # Clean, setup and build"
     echo ""
@@ -109,11 +110,15 @@ fi
 
 # Set build directory name
 BUILD_DIR="build-${PLATFORM}"
+BUILD_DIR_CREATED=false
 
 # Clean build directory if requested
 if [ "$CLEAN_BUILD" = true ] && [ -d "$PROJECT_ROOT/$BUILD_DIR" ]; then
     echo "Cleaning existing build directory: $BUILD_DIR"
     rm -rf "$PROJECT_ROOT/$BUILD_DIR"
+    BUILD_DIR_CREATED=true
+elif [ ! -d "$PROJECT_ROOT/$BUILD_DIR" ]; then
+    BUILD_DIR_CREATED=true
 fi
 
 # Initialize and update submodules if needed
@@ -129,8 +134,8 @@ if [ -f "$PROJECT_ROOT/poky/oe-init-build-env" ]; then
     cd "$PROJECT_ROOT"
     source poky/oe-init-build-env "$BUILD_DIR"
     
-    # Copy platform-specific configuration if it doesn't exist
-    if [ ! -f "conf/local.conf" ] && [ -f "$PROJECT_ROOT/conf-templates/$PLATFORM/local.conf" ]; then
+    # Copy platform-specific configuration when the build directory is first created
+    if [ "$BUILD_DIR_CREATED" = true ] && [ -f "$PROJECT_ROOT/conf-templates/$PLATFORM/local.conf" ]; then
         echo "Copying $PLATFORM configuration files..."
         cp "$PROJECT_ROOT/conf-templates/$PLATFORM/local.conf" conf/
         cp "$PROJECT_ROOT/conf-templates/$PLATFORM/bblayers.conf" conf/
@@ -150,6 +155,11 @@ if [ -f "$PROJECT_ROOT/poky/oe-init-build-env" ]; then
             echo "Target: Raspberry Pi 4 (ARM Cortex-A72 64-bit)"
             echo "Machine: raspberrypi4-64"
             echo "Build output: tmp/deploy/images/raspberrypi4-64/"
+            ;;
+        "raspberrypi5")
+            echo "Target: Raspberry Pi 5 (ARM Cortex-A76 64-bit)"
+            echo "Machine: raspberrypi5"
+            echo "Build output: tmp/deploy/images/raspberrypi5/"
             ;;
         "jetson-nano")
             echo "Target: NVIDIA Jetson Nano (ARM Cortex-A57)"

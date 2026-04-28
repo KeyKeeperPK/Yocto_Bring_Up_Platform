@@ -62,7 +62,7 @@ show_configuration() {
 
 # Show all platform configurations
 show_all_configurations() {
-    for platform in beaglebone raspberrypi4 jetson-nano; do
+    for platform in beaglebone raspberrypi4 raspberrypi5 jetson-nano; do
         print_subheader "$platform Configuration:"
         
         local build_dir="build-$platform"
@@ -294,7 +294,7 @@ validate_configuration() {
 validate_all_configurations() {
     local has_errors=false
     
-    for platform in beaglebone raspberrypi4 jetson-nano; do
+    for platform in beaglebone raspberrypi4 raspberrypi5 jetson-nano; do
         print_subheader "Validating $platform:"
         
         if ! validate_platform_configuration "$platform"; then
@@ -372,7 +372,7 @@ backup_configuration() {
     print_info "Backing up configuration to: $backup_dir"
     
     if [[ "$platform" == "all" ]]; then
-        for p in beaglebone raspberrypi4 jetson-nano; do
+        for p in beaglebone raspberrypi4 raspberrypi5 jetson-nano; do
             backup_platform_config "$p" "$backup_dir"
         done
     else
