@@ -9,7 +9,7 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 source "$SCRIPT_DIR/pk-logo-class.sh"
 
 # Supported platforms
-PLATFORMS=("beaglebone" "raspberrypi4" "raspberrypi5" "jetson-nano")
+PLATFORMS=("beaglebone" "raspberrypi4" "raspberrypi5" "raspberrypi5bare" "jetson-nano")
 
 # Default image to build
 DEFAULT_IMAGE="core-image-minimal"
@@ -32,6 +32,7 @@ usage() {
     echo "  $0 raspberrypi4                    # Setup only"
     echo "  $0 raspberrypi4 --build            # Setup and build core-image-minimal"
     echo "  $0 raspberrypi5 --build=core-image-base # Setup and build specific image"
+    echo "  $0 raspberrypi5bare --build            # Setup and build Pi 5 baseline boot image"
     echo "  $0 jetson-nano --build=core-image-base # Setup and build specific image"
     echo "  $0 beaglebone --clean --build      # Clean, setup and build"
     echo ""
@@ -158,6 +159,11 @@ if [ -f "$PROJECT_ROOT/poky/oe-init-build-env" ]; then
             ;;
         "raspberrypi5")
             echo "Target: Raspberry Pi 5 (ARM Cortex-A76 64-bit)"
+            echo "Machine: raspberrypi5"
+            echo "Build output: tmp/deploy/images/raspberrypi5/"
+            ;;
+        "raspberrypi5bare")
+            echo "Target: Raspberry Pi 5 baseline boot profile"
             echo "Machine: raspberrypi5"
             echo "Build output: tmp/deploy/images/raspberrypi5/"
             ;;

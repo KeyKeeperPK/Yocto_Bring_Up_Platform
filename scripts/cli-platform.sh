@@ -77,6 +77,19 @@ show_platform_list() {
         echo -e "  Status: ${CLI_YELLOW}- Not configured${CLI_NC}"
     fi
     echo ""
+
+    # Raspberry Pi 5 bare
+    echo -e "${CLI_MAGENTA}raspberrypi5bare${CLI_NC}"
+    echo "  Target: Raspberry Pi 5 64-bit (baseline boot validation)"
+    echo "  Features: Minimal systemd + SSH image, no shared Pi 4 init scripts"
+    echo "  Use case: First-flash boot verification and serial/HDMI bring-up"
+    echo "  Recipe: No custom Pi init package"
+    if [ -d "build-raspberrypi5bare" ]; then
+        echo -e "  Status: ${CLI_GREEN}✓ Configured${CLI_NC}"
+    else
+        echo -e "  Status: ${CLI_YELLOW}- Not configured${CLI_NC}"
+    fi
+    echo ""
     
     # Jetson Nano
     echo -e "${CLI_BLUE}jetson-nano${CLI_NC}"
@@ -100,7 +113,7 @@ show_platform_info() {
     
     if [[ "$platform" == "help" || -z "$platform" ]]; then
         print_info "Usage: pk platform info [PLATFORM]"
-        print_info "Available platforms: beaglebone, raspberrypi4, raspberrypi5, jetson-nano"
+        print_info "Available platforms: beaglebone, raspberrypi4, raspberrypi5, raspberrypi5bare, jetson-nano"
         return
     fi
     
@@ -118,6 +131,9 @@ show_platform_info() {
             ;;
         "raspberrypi5")
             show_raspberrypi5_info
+            ;;
+        "raspberrypi5bare")
+            show_raspberrypi5bare_info
             ;;
         "jetson-nano")
             show_jetson_nano_info
@@ -291,6 +307,47 @@ show_raspberrypi5_info() {
     echo "  rpi4-spi-setup.sh - Multi-bus SPI support with utilities"
 }
 
+# Raspberry Pi 5 bare detailed info
+show_raspberrypi5bare_info() {
+    print_header "Raspberry Pi 5 Bare-Minimum Platform"
+    echo ""
+
+    print_subheader "Hardware Specifications:"
+    echo "  CPU: Broadcom BCM2712 ARM Cortex-A76 @ 2.4GHz (quad-core)"
+    echo "  RAM: 4GB/8GB/16GB LPDDR4X"
+    echo "  Storage: microSD card"
+    echo "  Connectivity: Gigabit Ethernet, WiFi 5, Bluetooth 5.0, USB 3.0, PCIe 2.0"
+    echo ""
+
+    print_subheader "Bring-up Goals:"
+    echo "  Boot a minimal Raspberry Pi 5 image with the fewest moving parts"
+    echo "  Keep systemd and SSH available for first-flash validation"
+    echo "  Avoid the shared Raspberry Pi 4 init layer, Docker, static network profiles, and custom overlays"
+    echo ""
+
+    print_subheader "Configuration:"
+    echo "  Machine: raspberrypi5"
+    echo "  Init system: systemd"
+    echo "  Boot flow: direct firmware boot (U-Boot disabled)"
+    echo "  Features: minimal rootfs, serial-friendly baseline, no custom hardware bring-up"
+    echo ""
+
+    print_subheader "Build Information:"
+    if [ -d "build-raspberrypi5bare" ]; then
+        echo -e "  Status: ${CLI_GREEN}✓ Configured${CLI_NC}"
+        echo "  Build dir: build-raspberrypi5bare"
+        if [ -f "build-raspberrypi5bare/conf/local.conf" ]; then
+            echo "  Config: ✓ local.conf present"
+        fi
+        if [ -f "build-raspberrypi5bare/conf/bblayers.conf" ]; then
+            echo "  Layers: ✓ bblayers.conf present"
+        fi
+    else
+        echo -e "  Status: ${CLI_YELLOW}Not configured${CLI_NC}"
+        print_info "Run 'pk setup raspberrypi5bare' to configure"
+    fi
+}
+
 # Jetson Nano detailed info
 show_jetson_nano_info() {
     print_header "NVIDIA Jetson Nano Platform"
@@ -407,7 +464,7 @@ show_platform_status() {
     print_header "Platform Status Overview"
     echo ""
     
-    for platform in beaglebone raspberrypi4 raspberrypi5 jetson-nano; do
+    for platform in beaglebone raspberrypi4 raspberrypi5 raspberrypi5bare jetson-nano; do
         if [ -d "build-$platform" ]; then
             echo -e "${CLI_GREEN}✓ $platform${CLI_NC} - Configured"
         else
@@ -444,6 +501,7 @@ PLATFORM DETAILS:
     beaglebone     - Industrial IoT, headless operation
     raspberrypi4   - Edge computing, Docker support
     raspberrypi5   - Higher-performance edge computing with PCIe
+    raspberrypi5bare - Pi 5 baseline boot validation with minimal userspace
     jetson-nano    - AI/ML inference, GPU acceleration
 
 EOF

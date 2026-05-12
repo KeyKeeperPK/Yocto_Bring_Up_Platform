@@ -34,6 +34,7 @@ show_usage() {
     echo "  beaglebone         BeagleBone Black/Green industrial config"
     echo "  rpi4               Raspberry Pi 4 industrial config"
     echo "  rpi5               Raspberry Pi 5 industrial config (shared recipe)"
+    echo "  rpi5bare           Raspberry Pi 5 baseline boot config"
     echo ""
     echo "Examples:"
     echo "  $0 status"
@@ -87,7 +88,7 @@ show_version() {
                 grep "^PV\|^PR" "$META_CUSTOM_DIR/recipes-core/beaglebone-init-scripts/beaglebone-init-scripts.bb"
             fi
             ;;
-        rpi4|rpi5)
+        rpi4|rpi5|rpi5bare)
             echo "Raspberry Pi Hardware Init Version: $RPI4_VERSION"
             if [ -f "$META_CUSTOM_DIR/recipes-core/rpi4-init-scripts/rpi4-init-scripts.bb" ]; then
                 echo "Recipe file: rpi4-init-scripts.bb"
@@ -96,7 +97,7 @@ show_version() {
             ;;
         *)
             echo "Unknown platform: $platform"
-            echo "Available platforms: beaglebone, rpi4, rpi5"
+            echo "Available platforms: beaglebone, rpi4, rpi5, rpi5bare"
             exit 1
             ;;
     esac
@@ -183,9 +184,22 @@ show_info() {
                 ls -1 "$META_CUSTOM_DIR/recipes-core/rpi4-init-scripts/files/"*.patch 2>/dev/null || echo "  None"
             fi
             ;;
+        rpi5bare)
+            echo "Raspberry Pi 5 Bare-Minimum Configuration"
+            echo "========================================="
+            echo "Target Machine: raspberrypi5"
+            echo "Purpose:"
+            echo "  • Minimal first-flash boot validation"
+            echo "  • No shared Raspberry Pi 4 init layer"
+            echo "  • No Docker, static network config, or custom overlays"
+            echo ""
+            echo "Configuration Template:"
+            echo "  • conf-templates/raspberrypi5bare/local.conf"
+            echo "  • conf-templates/raspberrypi5bare/bblayers.conf"
+            ;;
         *)
             echo "Unknown platform: $platform"
-            echo "Available platforms: beaglebone, rpi4, rpi5"
+            echo "Available platforms: beaglebone, rpi4, rpi5, rpi5bare"
             exit 1
             ;;
     esac
@@ -203,6 +217,10 @@ apply_patches() {
         rpi4|rpi5)
             patch_dir="$META_CUSTOM_DIR/recipes-core/rpi4-init-scripts/files"
             echo "Applying patches for Raspberry Pi..."
+            ;;
+        rpi5bare)
+            echo "No recipe patches are used by the Raspberry Pi 5 bare profile."
+            return
             ;;
         *)
             echo "Unknown platform: $platform"
@@ -233,21 +251,21 @@ case "${1:-status}" in
         ;;
     version)
         if [ -z "$2" ]; then
-            echo "Please specify a platform: beaglebone, rpi4, or rpi5"
+            echo "Please specify a platform: beaglebone, rpi4, rpi5, or rpi5bare"
             exit 1
         fi
         show_version "$2"
         ;;
     info)
         if [ -z "$2" ]; then
-            echo "Please specify a platform: beaglebone, rpi4, or rpi5"
+            echo "Please specify a platform: beaglebone, rpi4, rpi5, or rpi5bare"
             exit 1
         fi
         show_info "$2"
         ;;
     patch)
         if [ -z "$2" ]; then
-            echo "Please specify a platform: beaglebone, rpi4, or rpi5"
+            echo "Please specify a platform: beaglebone, rpi4, rpi5, or rpi5bare"
             exit 1
         fi
         apply_patches "$2"

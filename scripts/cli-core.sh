@@ -42,7 +42,7 @@ print_subheader() {
 # Validation functions
 validate_platform() {
     local platform="$1"
-    local valid_platforms=("beaglebone" "raspberrypi4" "raspberrypi5" "jetson-nano")
+    local valid_platforms=("beaglebone" "raspberrypi4" "raspberrypi5" "raspberrypi5bare" "jetson-nano")
     
     for valid in "${valid_platforms[@]}"; do
         if [[ "$platform" == "$valid" ]]; then
