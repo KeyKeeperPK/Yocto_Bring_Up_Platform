@@ -1,15 +1,15 @@
 [submodule "poky"]
 	path = poky
 	url = https://github.com/yoctoproject/poky.git
-	branch = kirkstone
+	branch = scarthgap
 [submodule "meta-openembedded"]
 	path = meta-openembedded
 	url = https://github.com/openembedded/meta-openembedded.git
-	branch = kirkstone
+	branch = scarthgap
 [submodule "meta-raspberrypi"]
 	path = meta-raspberrypi
 	url = https://github.com/agherzan/meta-raspberrypi.git
-	branch = kirkstone
+	branch = scarthgap
 [submodule "meta-tegra"]
 	path = meta-tegra
 	url = https://github.com/OE4T/meta-tegra.git
@@ -17,4 +17,4 @@
 [submodule "meta-virtualization"]
 	path = meta-virtualization
 	url = https://github.com/lgirdk/meta-virtualization.git
-	branch = kirkstone
+	branch = scarthgap

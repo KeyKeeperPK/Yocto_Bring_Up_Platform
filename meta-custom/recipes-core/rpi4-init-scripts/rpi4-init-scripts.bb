@@ -3,7 +3,9 @@ DESCRIPTION = "Scripts to initialize and configure SSH, WiFi, Ethernet, Docker, 
 LICENSE = "MIT"
 LIC_FILES_CHKSUM = "file://${COMMON_LICENSE_DIR}/MIT;md5=0835ade698e0bcf8506ecda2f7b4f302"
 
-RDEPENDS:${PN} = "bash docker wpa-supplicant can-utils"
+RDEPENDS:${PN} = "bash wpa-supplicant can-utils"
+RDEPENDS:${PN}:append:raspberrypi4-64 = " docker-ce"
+RDEPENDS:${PN}:append:raspberrypi5 = " docker-moby"
 
 # Version with patch support
 PV = "1.0.0"

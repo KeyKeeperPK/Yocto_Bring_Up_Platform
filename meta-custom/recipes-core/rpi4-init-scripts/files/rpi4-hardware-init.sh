@@ -146,11 +146,10 @@ for service in "${DISABLE_SERVICES[@]}"; do
     fi
 done
 
-# Enable essential services
+# Keep this init script from forcing a network backend.
+# The image configuration decides whether NetworkManager or systemd-networkd
+# owns the interfaces, and Pi 5 currently uses NetworkManager.
 ENABLE_SERVICES=(
-    "systemd-networkd.service"
-    "systemd-resolved.service"
-    "ntp.service"
     "ssh.service"
 )
 
@@ -191,7 +190,7 @@ done
 log_message "Setting up monitoring and diagnostics..."
 
 # Create system info script
-cat > /usr/local/bin/rpi4-system-info <<'EOF'
+cat > /usr/local/bin/rpi-system-info <<'EOF'
 #!/bin/bash
 # Raspberry Pi 4/5 System Information
 
@@ -244,8 +243,9 @@ echo "===== Services ====="
 systemctl status ssh docker --no-pager -l
 EOF
 
-chmod +x /usr/local/bin/rpi4-system-info
-log_message "Created system info utility: rpi4-system-info"
+chmod +x /usr/local/bin/rpi-system-info
+ln -sf /usr/local/bin/rpi-system-info /usr/local/bin/rpi4-system-info
+log_message "Created system info utility: rpi-system-info"
 
 # ===================================================================
 # COMPLETION
@@ -267,7 +267,7 @@ log_message "  ✓ I2C and GPIO access"
 
 log_message ""
 log_message "Available utilities:"
-log_message "  - rpi4-system-info: System status and diagnostics"
+log_message "  - rpi-system-info: System status and diagnostics"
 log_message "  - uart-test: UART interface testing"
 log_message "  - spi-test: SPI interface testing"  
 log_message "  - spi-speed-test: SPI speed benchmarking"
