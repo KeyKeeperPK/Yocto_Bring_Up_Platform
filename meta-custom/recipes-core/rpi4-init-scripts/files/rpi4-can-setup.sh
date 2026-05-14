@@ -21,34 +21,47 @@ modprobe slcan
 modprobe mcp251x
 modprobe mcp251xfd
 
-# Configure CAN0 interface (MCP2515 on SPI0.0)
-if [ -d /sys/class/net/can0 ]; then
-    # Try to configure with CAN-FD first, fallback to classic CAN
-    if ip link set can0 type can bitrate 500000 dbitrate 2000000 fd on 2>/dev/null; then
-        log_message "CAN0 configured with CAN-FD: 500kbps/2Mbps"
+configure_can_iface() {
+    local iface="$1"
+
+    ip link set "$iface" down 2>/dev/null || true
+
+    # Detect MCP251xFD (true CAN-FD controller) vs MCP2515 (classic only)
+    local modalias=""
+    [ -f /sys/class/net/"$iface"/device/modalias ] && \
+        modalias=$(cat /sys/class/net/"$iface"/device/modalias 2>/dev/null)
+
+    if echo "$modalias" | grep -q "mcp251xfd"; then
+        # MCP251xFD: supports CAN-FD with restart-ms so BUS-OFF auto-recovers
+        if ip link set "$iface" type can \
+                bitrate 500000 sample-point 0.8 \
+                dbitrate 2000000 dsample-point 0.8 \
+                fd on restart-ms 100 2>/dev/null; then
+            log_message "${iface} configured: CAN-FD 500kbps/2Mbps (MCP251xFD), restart-ms=100"
+        else
+            ip link set "$iface" type can bitrate 500000 restart-ms 100
+            log_message "${iface} CAN-FD setup failed; falling back to classic CAN 500kbps"
+        fi
     else
-        ip link set can0 type can bitrate 500000
-        log_message "CAN0 configured with classic CAN: 500kbps"
+        # MCP2515 or unknown: classic CAN only
+        ip link set "$iface" type can bitrate 500000 restart-ms 100
+        log_message "${iface} configured: classic CAN 500kbps (restart-ms=100)"
     fi
-    
-    ip link set up can0
-    log_message "CAN0 interface is up"
+
+    ip link set up "$iface"
+    log_message "${iface} interface is up"
+}
+
+# Configure CAN0 interface (MCP251xFD on SPI0.0)
+if [ -d /sys/class/net/can0 ]; then
+    configure_can_iface can0
 else
     log_message "CAN0 interface not found - check device tree overlay"
 fi
 
-# Configure CAN1 interface (MCP2515 on SPI0.1) 
+# Configure CAN1 interface (MCP251xFD on SPI0.1)
 if [ -d /sys/class/net/can1 ]; then
-    # Try to configure with CAN-FD first, fallback to classic CAN
-    if ip link set can1 type can bitrate 500000 dbitrate 2000000 fd on 2>/dev/null; then
-        log_message "CAN1 configured with CAN-FD: 500kbps/2Mbps"
-    else
-        ip link set can1 type can bitrate 500000
-        log_message "CAN1 configured with classic CAN: 500kbps"
-    fi
-    
-    ip link set up can1
-    log_message "CAN1 interface is up"
+    configure_can_iface can1
 else
     log_message "CAN1 interface not found - check device tree overlay"
 fi
@@ -78,7 +91,7 @@ cat > /etc/can/interfaces <<EOF
 
 # Usage examples:
 # Classic CAN: ip link set can0 type can bitrate 500000
-# CAN-FD: ip link set can0 type can bitrate 500000 dbitrate 2000000 fd on
+# CAN-FD: ip link set can0 type can bitrate 500000 sample-point 0.8 dbitrate 2000000 dsample-point 0.8 fd on
 #
 # Send test message: cansend can0 123#DEADBEEF
 # Monitor: candump can0

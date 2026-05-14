@@ -14,9 +14,9 @@
 +    
 +    if [ "$CAN_FD_SUPPORTED" = true ]; then
 +        # Advanced CAN-FD configuration for MCP251xFD
-+        if ip link set can0 type can bitrate 500000 dbitrate 4000000 fd on 2>/dev/null; then
++        if ip link set can0 type can bitrate 500000 sample-point 0.8 dbitrate 2000000 dsample-point 0.8 fd on 2>/dev/null; then
 +            log_message "CAN0 configured with high-speed CAN-FD: 500kbps/4Mbps"
-+        elif ip link set can0 type can bitrate 500000 dbitrate 2000000 fd on 2>/dev/null; then
++        elif ip link set can0 type can bitrate 500000 sample-point 0.8 dbitrate 2000000 dsample-point 0.8 fd on 2>/dev/null; then
 +            log_message "CAN0 configured with standard CAN-FD: 500kbps/2Mbps"
 +        else
 +            ip link set can0 type can bitrate 500000
@@ -24,7 +24,7 @@
 +        fi
 +    else
 +        # Standard CAN-FD attempt for MCP2515
-+        if ip link set can0 type can bitrate 500000 dbitrate 2000000 fd on 2>/dev/null; then
++        if ip link set can0 type can bitrate 500000 sample-point 0.8 dbitrate 2000000 dsample-point 0.8 fd on 2>/dev/null; then
 +            log_message "CAN0 configured with CAN-FD: 500kbps/2Mbps"
 +        else
 +            ip link set can0 type can bitrate 500000
@@ -32,7 +32,7 @@
 +        fi
 +    fi
 +
-     if ip link set can0 type can bitrate 500000 dbitrate 2000000 fd on 2>/dev/null; then
+     if ip link set can0 type can bitrate 500000 sample-point 0.8 dbitrate 2000000 dsample-point 0.8 fd on 2>/dev/null; then
          log_message "CAN0 configured with CAN-FD: 500kbps/2Mbps"
      else
          ip link set can0 type can bitrate 500000

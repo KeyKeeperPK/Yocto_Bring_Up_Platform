@@ -22,8 +22,6 @@ SRC_URI = " \
     file://rpi4-uart-setup.sh \
     file://rpi4-spi-setup.sh \
     file://rpi4-hardware-init.service \
-    file://rpi4-can-fd-support.patch;apply=yes \
-    file://rpi4-docker-optimization.patch;apply=yes \
     file://rpi4-hardware-init.tmpfiles \
     "
 

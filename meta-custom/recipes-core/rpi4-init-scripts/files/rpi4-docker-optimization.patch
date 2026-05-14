@@ -1,9 +1,9 @@
 --- a/rpi4-hardware-init.sh
 +++ b/rpi4-hardware-init.sh
-@@ -58,6 +58,25 @@ log_message "Configuring Docker..."
- if systemctl list-unit-files | grep -q docker.service; then
+@@ -80,6 +80,25 @@ if systemctl list-unit-files | grep -q docker.service; then
      systemctl enable docker
      systemctl start docker
+     log_message "Docker service enabled and started"
 +    
 +    # Docker optimization for Raspberry Pi 4
 +    mkdir -p /etc/docker
@@ -23,6 +23,5 @@
 +    
 +    # Restart Docker with new configuration
 +    systemctl restart docker
-     log_message "Docker service enabled and started"
      
      # Add users to docker group

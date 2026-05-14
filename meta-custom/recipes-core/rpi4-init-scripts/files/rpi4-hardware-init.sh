@@ -10,6 +10,20 @@ log_message() {
     echo "$(date): RPI-HARDWARE-INIT: $1" | tee -a "$LOG_FILE"
 }
 
+enable_and_start_first_available() {
+    for unit in "$@"; do
+        if systemctl list-unit-files | grep -q "^${unit}[[:space:]]"; then
+            systemctl enable "$unit" 2>/dev/null || true
+            systemctl start "$unit" 2>/dev/null || true
+            log_message "Enabled and started service: $unit"
+            return 0
+        fi
+    done
+
+    log_message "No matching systemd unit found from: $*"
+    return 1
+}
+
 # Ensure log directory exists
 mkdir -p "$(dirname "$LOG_FILE")"
 
@@ -34,10 +48,8 @@ SCRIPT_DIR="$(dirname "$0")"
 
 log_message "Configuring network interfaces..."
 
-# Enable SSH service
-systemctl enable ssh
-systemctl start ssh
-log_message "SSH service enabled and started"
+# Enable SSH using the systemd unit available in this Yocto release.
+enable_and_start_first_available sshd.service sshd.socket ssh.service
 
 # Configure Ethernet interface
 if ip link show eth0 >/dev/null 2>&1; then
@@ -84,6 +96,24 @@ if systemctl list-unit-files | grep -q docker.service; then
     systemctl enable docker
     systemctl start docker
     log_message "Docker service enabled and started"
+    
+    # Docker optimization for Raspberry Pi 4/5
+    mkdir -p /etc/docker
+    cat > /etc/docker/daemon.json << 'EOF'
+{
+    "storage-driver": "overlay2",
+    "log-driver": "json-file",
+    "log-opts": {
+        "max-size": "10m",
+        "max-file": "3"
+    },
+    "max-concurrent-downloads": 3,
+    "max-concurrent-uploads": 3,
+    "default-runtime": "runc"
+}
+EOF
+    systemctl restart docker
+    log_message "Docker daemon optimized and restarted"
     
     # Add users to docker group
     for user in pi root; do
@@ -150,6 +180,8 @@ done
 # The image configuration decides whether NetworkManager or systemd-networkd
 # owns the interfaces, and Pi 5 currently uses NetworkManager.
 ENABLE_SERVICES=(
+    "sshd.service"
+    "sshd.socket"
     "ssh.service"
 )
 
@@ -240,7 +272,7 @@ df -h / /boot
 echo ""
 
 echo "===== Services ====="
-systemctl status ssh docker --no-pager -l
+systemctl status sshd.service sshd.socket ssh.service docker --no-pager -l 2>/dev/null || true
 EOF
 
 chmod +x /usr/local/bin/rpi-system-info
