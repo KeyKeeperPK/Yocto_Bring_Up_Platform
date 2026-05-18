@@ -21,52 +21,55 @@
  modprobe can
  modprobe can-raw
  modprobe can-bcm
-@@ -21,75 +20,73 @@
+@@ -21,51 +20,56 @@
  modprobe mcp251x
  modprobe mcp251xfd
  
 -# Configure CAN0 interface (MCP2515 on SPI0.0)
+-if [ -d /sys/class/net/can0 ]; then
+-    # Try to configure with CAN-FD first, fallback to classic CAN
+-    if ip link set can0 type can bitrate 500000 dbitrate 2000000 fd on 2>/dev/null; then
+-        log_message "CAN0 configured with CAN-FD: 500kbps/2Mbps"
 +configure_can_iface() {
 +    local iface="$1"
 +
 +    ip link set "$iface" down 2>/dev/null || true
 +
 +    local modalias=""
-+    [ -f /sys/class/net/"$iface"/device/modalias ] &&         modalias=$(cat /sys/class/net/"$iface"/device/modalias 2>/dev/null)
-+
-+    if echo "$modalias" | grep -q "mcp251xfd"; then
-+        if ip link set "$iface" type can                 bitrate 500000 sample-point 0.8                 dbitrate 2000000 dsample-point 0.8                 fd on restart-ms 100 2>/dev/null; then
-+            log_message "${iface} configured: CAN-FD 500kbps/2Mbps (MCP251xFD), restart-ms=100"
-+        else
-+            ip link set "$iface" type can bitrate 500000 restart-ms 100
-+            log_message "${iface} CAN-FD setup failed; falling back to classic CAN 500kbps"
-+        fi
-+    else
-+        ip link set "$iface" type can bitrate 500000 restart-ms 100
-+        log_message "${iface} configured: classic CAN 500kbps (restart-ms=100)"
++    if [ -f "/sys/class/net/$iface/device/modalias" ]; then
++        modalias=$(cat "/sys/class/net/$iface/device/modalias" 2>/dev/null)
 +    fi
 +
-+    ip link set up "$iface"
-+    log_message "${iface} interface is up"
-+}
-+
- if [ -d /sys/class/net/can0 ]; then
--    # Try to configure with CAN-FD first, fallback to classic CAN
--    if ip link set can0 type can bitrate 500000 dbitrate 2000000 fd on 2>/dev/null; then
--        log_message "CAN0 configured with CAN-FD: 500kbps/2Mbps"
--    else
++    if echo "$modalias" | grep -q "mcp251xfd"; then
++        if ip link set "$iface" type can \
++            bitrate 500000 sample-point 0.8 \
++            dbitrate 2000000 dsample-point 0.8 \
++            fd on restart-ms 100 2>/dev/null; then
++            log_message "$iface configured: CAN-FD 500kbps/2Mbps (MCP251xFD), restart-ms=100"
++        else
++            ip link set "$iface" type can bitrate 500000 restart-ms 100
++            log_message "$iface CAN-FD setup failed; falling back to classic CAN 500kbps"
++        fi
+     else
 -        ip link set can0 type can bitrate 500000
 -        log_message "CAN0 configured with classic CAN: 500kbps"
--    fi
--    
++        ip link set "$iface" type can bitrate 500000 restart-ms 100
++        log_message "$iface configured: classic CAN 500kbps (restart-ms=100)"
+     fi
+ 
 -    ip link set up can0
 -    log_message "CAN0 interface is up"
++    ip link set up "$iface"
++    log_message "$iface interface is up"
++}
++
++if [ -d /sys/class/net/can0 ]; then
 +    configure_can_iface can0
  else
      log_message "CAN0 interface not found - check device tree overlay"
  fi
  
--# Configure CAN1 interface (MCP2515 on SPI0.1) 
+-# Configure CAN1 interface (MCP2515 on SPI0.1)
  if [ -d /sys/class/net/can1 ]; then
 -    # Try to configure with CAN-FD first, fallback to classic CAN
 -    if ip link set can1 type can bitrate 500000 dbitrate 2000000 fd on 2>/dev/null; then
@@ -75,7 +78,7 @@
 -        ip link set can1 type can bitrate 500000
 -        log_message "CAN1 configured with classic CAN: 500kbps"
 -    fi
--    
+-
 -    ip link set up can1
 -    log_message "CAN1 interface is up"
 +    configure_can_iface can1
@@ -94,19 +97,14 @@
  mkdir -p /etc/can
  
 -# Create CAN interface configuration file
- cat > /etc/can/interfaces <<EOF
+-cat > /etc/can/interfaces <<EOF
 -# CAN interface configuration for Raspberry Pi 4
++cat > /etc/can/interfaces <<EOF2
 +# CAN interface configuration for Raspberry Pi 5
  # This file contains settings for CAN interfaces
  
  # CAN0 - Primary interface (SPI0.0)
- # Bitrate: 500kbps (classic CAN), 2Mbps (CAN-FD data)
- # Device: MCP2515/MCP251xFD
- 
--# CAN1 - Secondary interface (SPI0.1) 
-+# CAN1 - Secondary interface (SPI0.1)
- # Bitrate: 500kbps (classic CAN), 2Mbps (CAN-FD data)
- # Device: MCP2515/MCP251xFD
+@@ -78,19 +82,17 @@
  
  # Usage examples:
  # Classic CAN: ip link set can0 type can bitrate 500000
@@ -115,23 +113,26 @@
  #
  # Send test message: cansend can0 123#DEADBEEF
  # Monitor: candump can0
- EOF
+-EOF
++EOF2
  
 -# Test CAN interfaces availability
  for interface in can0 can1; do
-     if ip link show $interface >/dev/null 2>&1; then
+-    if ip link show $interface >/dev/null 2>&1; then
++    if ip link show "$interface" >/dev/null 2>&1; then
          log_message "$interface is available and configured"
--        
+ 
 -        # Check if CAN-FD is supported
-+
-         if ip -details link show $interface | grep -q "fd"; then
+-        if ip -details link show $interface | grep -q "fd"; then
++        if ip -details link show "$interface" | grep -q "fd"; then
              log_message "$interface supports CAN-FD"
          else
-@@ -98,6 +95,6 @@
+             log_message "$interface supports classic CAN only"
+@@ -98,6 +100,6 @@
      fi
  done
  
 -log_message "Raspberry Pi 4 CAN setup completed"
 +log_message "Raspberry Pi 5 CAN setup completed"
  log_message "Available CAN tools: cansend, candump, canplayer, canlogserver"
--log_message "Configuration file: /etc/can/interfaces"+log_message "Configuration file: /etc/can/interfaces"
+ log_message "Configuration file: /etc/can/interfaces"
