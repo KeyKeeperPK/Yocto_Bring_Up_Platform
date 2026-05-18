@@ -30,14 +30,14 @@ if [ -d /sys/class/net/can0 ]; then
         ip link set can0 type can bitrate 500000
         log_message "CAN0 configured with classic CAN: 500kbps"
     fi
-    
+
     ip link set up can0
     log_message "CAN0 interface is up"
 else
     log_message "CAN0 interface not found - check device tree overlay"
 fi
 
-# Configure CAN1 interface (MCP2515 on SPI0.1) 
+# Configure CAN1 interface (MCP2515 on SPI0.1)
 if [ -d /sys/class/net/can1 ]; then
     # Try to configure with CAN-FD first, fallback to classic CAN
     if ip link set can1 type can bitrate 500000 dbitrate 2000000 fd on 2>/dev/null; then
@@ -46,7 +46,7 @@ if [ -d /sys/class/net/can1 ]; then
         ip link set can1 type can bitrate 500000
         log_message "CAN1 configured with classic CAN: 500kbps"
     fi
-    
+
     ip link set up can1
     log_message "CAN1 interface is up"
 else
@@ -72,7 +72,7 @@ cat > /etc/can/interfaces <<EOF
 # Bitrate: 500kbps (classic CAN), 2Mbps (CAN-FD data)
 # Device: MCP2515/MCP251xFD
 
-# CAN1 - Secondary interface (SPI0.1) 
+# CAN1 - Secondary interface (SPI0.1)
 # Bitrate: 500kbps (classic CAN), 2Mbps (CAN-FD data)
 # Device: MCP2515/MCP251xFD
 
@@ -88,7 +88,7 @@ EOF
 for interface in can0 can1; do
     if ip link show $interface >/dev/null 2>&1; then
         log_message "$interface is available and configured"
-        
+
         # Check if CAN-FD is supported
         if ip -details link show $interface | grep -q "fd"; then
             log_message "$interface supports CAN-FD"

@@ -184,15 +184,25 @@ find_image() {
         exit 1
     fi
     
-    # Look for .wic.bz2 or .wic.gz images
-    local image_file=$(find "$deploy_dir" -name "${IMAGE_TYPE}-${machine}.wic.bz2" -o -name "${IMAGE_TYPE}-${machine}.wic.gz" -o -name "${IMAGE_TYPE}-${machine}.wic" | head -n 1)
+    # Look for the newest matching flashable image.
+    # Yocto often emits versioned names like *.rootfs-<timestamp>.wic.bz2.
+    local image_file=$(find "$deploy_dir" \( \
+        -name "${IMAGE_TYPE}-${machine}.wic.bz2" -o \
+        -name "${IMAGE_TYPE}-${machine}.wic.gz" -o \
+        -name "${IMAGE_TYPE}-${machine}.wic" -o \
+        -name "${IMAGE_TYPE}-${machine}.rootfs-*.wic.bz2" -o \
+        -name "${IMAGE_TYPE}-${machine}.rootfs-*.wic.gz" -o \
+        -name "${IMAGE_TYPE}-${machine}.rootfs-*.wic" -o \
+        -name "${IMAGE_TYPE}-${machine}.rpi-sdimg" -o \
+        -name "${IMAGE_TYPE}-${machine}.rootfs-*.rpi-sdimg" \
+        \) -printf '%T@ %p\n' | sort -nr | head -n 1 | cut -d' ' -f2-)
     
     if [[ -z "$image_file" ]]; then
         print_error "Image file not found in $deploy_dir"
-        print_info "Looking for: ${IMAGE_TYPE}-${machine}.wic*"
+        print_info "Looking for: ${IMAGE_TYPE}-${machine}.wic*, ${IMAGE_TYPE}-${machine}.rpi-sdimg*"
         echo ""
         print_info "Available images:"
-        ls -lh "$deploy_dir"/*.wic* 2>/dev/null || print_warning "No .wic images found"
+        ls -lh "$deploy_dir"/*.wic* "$deploy_dir"/*.rpi-sdimg* 2>/dev/null || print_warning "No flashable images found"
         exit 1
     fi
     
@@ -222,8 +232,8 @@ flash_with_bmap() {
     print_info "Device: $device"
     
     if [[ -z "$bmap_file" ]]; then
-        print_warning "No .bmap file found, bmaptool will be slower"
-        sudo bmaptool copy "$image_file" "$device"
+        print_warning "No .bmap file found, flashing without bmap"
+        sudo bmaptool copy --nobmap "$image_file" "$device"
     else
         print_info "Using bmap: $(basename $bmap_file)"
         sudo bmaptool copy --bmap "$bmap_file" "$image_file" "$device"

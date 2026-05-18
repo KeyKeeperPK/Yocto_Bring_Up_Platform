@@ -70,14 +70,15 @@ show_platform_list() {
     echo "  Target: Raspberry Pi 5 64-bit"
     echo "  Features: SSH, WiFi, Docker, CAN-FD, UART, SPI, Ethernet, PCIe"
     echo "  Use case: Higher-performance edge computing"
-    echo "  Recipe: rpi4-init-scripts (shared Raspberry Pi init layer)"
+    echo "  Recipe: rpi5-init-scripts"
     if [ -d "build-raspberrypi5" ]; then
         echo -e "  Status: ${CLI_GREEN}✓ Configured${CLI_NC}"
     else
         echo -e "  Status: ${CLI_YELLOW}- Not configured${CLI_NC}"
     fi
     echo ""
-    
+
+
     # Jetson Nano
     echo -e "${CLI_BLUE}jetson-nano${CLI_NC}"
     echo "  Target: NVIDIA Jetson Nano"
@@ -261,7 +262,7 @@ show_raspberrypi5_info() {
     echo ""
 
     print_subheader "Configuration:"
-    echo "  Recipe: rpi4-init-scripts v1.0.0 (shared with Raspberry Pi 4)"
+    echo "  Recipe: rpi5-init-scripts v1.0.0"
     echo "  Machine: raspberrypi5"
     echo "  Init system: systemd"
     echo "  Boot flow: direct firmware boot (U-Boot disabled)"
@@ -290,6 +291,7 @@ show_raspberrypi5_info() {
     echo "  rpi4-uart-setup.sh - Multi-UART configuration"
     echo "  rpi4-spi-setup.sh - Multi-bus SPI support with utilities"
 }
+
 
 # Jetson Nano detailed info
 show_jetson_nano_info() {

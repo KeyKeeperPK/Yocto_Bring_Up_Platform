@@ -20,7 +20,7 @@ do_install() {
 
 do_install:append() {
     install -d ${D}${sysconfdir}/NetworkManager/system-connections
-    install -m 0644 ${WORKDIR}/eth0-static.nmconnection \
+    install -m 0600 ${WORKDIR}/eth0-static.nmconnection \
         ${D}${sysconfdir}/NetworkManager/system-connections/
 }
 

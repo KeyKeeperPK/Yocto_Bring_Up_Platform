@@ -7,6 +7,12 @@ This repository contains the Yocto Project setup for building custom Linux image
 - **Raspberry Pi 5** (ARM Cortex-A76 64-bit)
 - **NVIDIA Jetson Nano** (ARM Cortex-A57 with GPU acceleration)
 
+## Release Direction
+
+The Raspberry Pi and generic Yocto stack in this repository is being moved from `kirkstone` to `scarthgap` to stay on a supported Yocto LTS and to align with newer Raspberry Pi 5 hardware revisions.
+
+The Jetson Nano path is not included in that branch switch yet. It is still tied to the legacy `meta-tegra` `kirkstone-l4t-r32.7.x` line, because current `scarthgap` `meta-tegra` targets newer Orin-era platforms rather than Nano.
+
 ## Project Structure
 
 - `poky/` - The core Yocto Project repository (submodule)

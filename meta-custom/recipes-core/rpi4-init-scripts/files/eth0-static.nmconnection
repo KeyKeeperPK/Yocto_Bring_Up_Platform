@@ -3,6 +3,7 @@ id=Wired connection 1
 type=ethernet
 interface-name=eth0
 autoconnect=true
+autoconnect-priority=100
 
 [ipv4]
 method=manual
