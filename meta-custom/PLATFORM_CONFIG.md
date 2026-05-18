@@ -1,182 +1,121 @@
 # Platform-Specific Hardware Initialization
 
-This document describes the separated platform-specific hardware initialization configurations for BeagleBone and Raspberry Pi platforms.
+This document describes the separated platform-specific hardware initialization configurations for BeagleBone, Raspberry Pi 4, and Raspberry Pi 5.
 
 ## Overview
 
-The meta-custom layer has been restructured to support platform-specific configurations with versioning and patch management:
+The `meta-custom` layer now keeps a clean Raspberry Pi 4 base recipe and a dedicated Raspberry Pi 5 recipe that reuses the Pi 4 base files plus Pi-5-specific patches.
 
 ```
 meta-custom/
 ├── recipes-core/
 │   ├── beaglebone-init-scripts/
-│   │   ├── beaglebone-init-scripts.bb          # BeagleBone recipe
+│   │   ├── beaglebone-init-scripts.bb
 │   │   └── files/
-│   │       ├── beagle-hardware-init.sh         # Main init script
-│   │       ├── beagle-can-setup.sh             # CAN configuration
-│   │       ├── beagle-uart-setup.sh            # UART setup
-│   │       ├── beagle-spi-setup.sh             # SPI setup
-│   │       ├── beagle-wifi-setup.sh            # WiFi setup
-│   │       ├── beagle-hardware-init.service    # Systemd service
-│   │       └── beagle-can-fd.patch             # CAN-FD support patch
-│   └── rpi4-init-scripts/
-│       ├── rpi4-init-scripts.bb                # Raspberry Pi 4/5 recipe
+│   │       ├── beagle-hardware-init.sh
+│   │       ├── beagle-can-setup.sh
+│   │       ├── beagle-uart-setup.sh
+│   │       ├── beagle-spi-setup.sh
+│   │       ├── beagle-wifi-setup.sh
+│   │       ├── beagle-hardware-init.service
+│   │       └── beagle-can-fd.patch
+│   ├── rpi4-init-scripts/
+│   │   ├── rpi4-init-scripts.bb            # Raspberry Pi 4 base recipe
+│   │   └── files/
+│   │       ├── rpi4-hardware-init.sh       # Clean base hardware init script
+│   │       ├── rpi4-can-setup.sh           # Clean base CAN setup script
+│   │       ├── rpi4-uart-setup.sh
+│   │       ├── rpi4-spi-setup.sh
+│   │       ├── rpi4-hardware-init.service
+│   │       └── rpi4-hardware-init.tmpfiles
+│   └── rpi5-init-scripts/
+│       ├── rpi5-init-scripts.bb            # Raspberry Pi 5 recipe
 │       └── files/
-│           ├── rpi4-hardware-init.sh           # Main init script
-│           ├── rpi4-can-setup.sh               # CAN/CAN-FD setup
-│           ├── rpi4-uart-setup.sh              # UART configuration
-│           ├── rpi4-spi-setup.sh               # SPI configuration
-│           ├── rpi4-hardware-init.service      # Systemd service
-│           ├── rpi4-can-fd-support.patch       # Advanced CAN-FD patch
-│           └── rpi4-docker-optimization.patch  # Docker optimization patch
+│           ├── rpi5-hardware-init.service
+│           ├── rpi5-hardware-init.patch    # Pi-5-specific service/network/docker delta
+│           └── rpi5-can-setup.patch        # Pi-5-specific CAN-FD/controller delta
 ```
 
 ## Platform Configurations
 
-### BeagleBone Industrial Configuration (v1.0.0)
+### BeagleBone Industrial Configuration
 
 **Target Machine:** `beaglebone-yocto`
 
-**Features:**
-- Headless operation (no UI/X11)
-- CAN bus support
-- Multiple UART interfaces (ttyO1-5)
-- SPI interface support
-- WiFi support (USB adapters)
-- Industrial IoT tools
-
 **Recipe:** `beaglebone-init-scripts.bb`
-- Compatible with BeagleBone machines only
-- Versioned with PV/PR support
-- Includes CAN-FD patch
 
-**Scripts:**
-- `beagle-hardware-init.sh` - Main system configuration
-- `beagle-can-setup.sh` - CAN interface setup with fallback
-- `beagle-uart-setup.sh` - UART configuration (ttyO1-5)
-- `beagle-spi-setup.sh` - SPI setup (spidev1.x, spidev2.x)
-- `beagle-wifi-setup.sh` - USB WiFi adapter support
-
-### Raspberry Pi 4 Industrial Configuration (v1.0.0)
+### Raspberry Pi 4 Industrial Configuration
 
 **Target Machine:** `raspberrypi4-64`
 
-**Features:**
-- SSH server (port 22)
-- WiFi and Bluetooth support
-- Docker container platform
-- CAN bus with CAN-FD support
-- Multiple UART interfaces (ttyAMA1-5)
-- Multiple SPI interfaces (6 buses)
-- Gigabit Ethernet
-- GPIO and I2C access
-
 **Recipe:** `rpi4-init-scripts.bb`
-- Compatible with Raspberry Pi 4 64-bit and Raspberry Pi 5
-- Versioned with PV/PR support
-- Includes CAN-FD and Docker optimization patches
 
-**Scripts:**
-- `rpi4-hardware-init.sh` - Complete system initialization
-- `rpi4-can-setup.sh` - Advanced CAN/CAN-FD setup with hardware detection
-- `rpi4-uart-setup.sh` - Multi-UART configuration
-- `rpi4-spi-setup.sh` - 6-bus SPI support with testing utilities
+**Design:**
+- uses the clean base scripts directly
+- keeps the original Raspberry Pi 4 service and runtime naming
+- uses `docker-ce`
 
-## Version Management
+### Raspberry Pi 5 Industrial Configuration
 
-Use the `platform-version-manager.sh` script to manage configurations:
+**Target Machine:** `raspberrypi5`
 
-### Commands
+**Recipe:** `rpi5-init-scripts.bb`
 
-```bash
-# Show status of all platforms
-./platform-version-manager.sh status
+**Design:**
+- reuses the Raspberry Pi 4 base scripts as source inputs
+- applies explicit Pi-5-specific patches during the recipe build
+- installs Pi-5-specific runtime names like `rpi5-hardware-init.sh`
+- uses `docker-moby`
 
-# Show version of specific platform
-./platform-version-manager.sh version beaglebone
-./platform-version-manager.sh version rpi4
+## Patch Strategy
 
-# Show detailed platform information
-./platform-version-manager.sh info beaglebone
-./platform-version-manager.sh info rpi4
+The Raspberry Pi path now follows this rule:
 
-# Show available patches
-./platform-version-manager.sh patch beaglebone
-./platform-version-manager.sh patch rpi4
-```
+- base behavior lives in `rpi4-init-scripts/files/*.sh`
+- Raspberry Pi 5 differences live in `rpi5-init-scripts/files/*.patch`
+- recipe selection decides which variant gets built
 
-## Patch Management
+Current Pi 5 patch split:
 
-### BeagleBone Patches
-
-1. **beagle-can-fd.patch** - Adds CAN-FD support with automatic fallback to classic CAN
-
-### Raspberry Pi 4 Patches
-
-1. **rpi4-can-fd-support.patch** - Advanced CAN-FD support with hardware detection
-2. **rpi4-docker-optimization.patch** - Docker performance optimization for ARM64
+1. `rpi5-hardware-init.patch`
+   - SSH service detection for newer systemd packaging
+   - Docker daemon tuning
+   - no forced `systemd-networkd` ownership
+   - Pi-5-specific helper names
+2. `rpi5-can-setup.patch`
+   - MCP251xFD detection
+   - tuned CAN-FD timing
+   - `restart-ms` recovery behavior
 
 ## Configuration Usage
 
-### BeagleBone Build
-
-Update `conf-templates/beaglebone/local.conf`:
-```
-IMAGE_INSTALL:append = " beaglebone-init-scripts"
-```
-
 ### Raspberry Pi 4 Build
 
-Update `conf-templates/raspberrypi4/local.conf` or `conf-templates/raspberrypi5/local.conf`:
+`conf-templates/raspberrypi4/local.conf` installs:
+
+```conf
+IMAGE_INSTALL:append = " rpi4-init-scripts netcfg"
 ```
-IMAGE_INSTALL:append = " rpi4-init-scripts"
+
+### Raspberry Pi 5 Build
+
+`conf-templates/raspberrypi5/local.conf` installs:
+
+```conf
+IMAGE_INSTALL:append = " rpi5-init-scripts netcfg"
 ```
 
 ## Runtime Utilities
 
-### BeagleBone
-- `beagle-system-info` - System diagnostics and status
-
 ### Raspberry Pi 4
-- `rpi4-system-info` - Comprehensive system information
-- `uart-test` - UART interface testing
-- `spi-test` - SPI interface testing
-- `spi-speed-test` - SPI performance benchmarking
+- `rpi4-system-info`
+- `uart-test`
+- `spi-test`
+- `spi-speed-test`
 
-## Configuration Files
-
-### BeagleBone
-- `/etc/beaglebone/version` - Configuration version info
-- `/etc/can/interfaces` - CAN bus settings
-- `/etc/uart/interfaces` - UART pin mappings
-- `/etc/spi/interfaces` - SPI pin mappings
-- `/etc/wpa_supplicant/wpa_supplicant.conf` - WiFi settings
-
-### Raspberry Pi 4
-- `/etc/rpi4/version` - Configuration version info  
-- `/etc/can/interfaces` - CAN/CAN-FD settings
-- `/etc/uart/interfaces` - UART pin mappings
-- `/etc/spi/interfaces` - SPI pin mappings
-- `/etc/wpa_supplicant/wpa_supplicant.conf` - WiFi settings
-- `/etc/docker/daemon.json` - Docker optimization settings
-
-## Building
-
-```bash
-# Build BeagleBone industrial image
-./setup-build.sh --platform beaglebone
-./build.sh --platform beaglebone
-
-# Build Raspberry Pi 4 industrial image
-./setup-build.sh --platform raspberrypi4
-./build.sh --platform raspberrypi4
-```
-
-## Version History
-
-### v1.0.0 (Initial Release)
-- Separated platform-specific configurations
-- Added versioning and patch support
-- Implemented CAN-FD support for both platforms
-- Added Docker optimization for Raspberry Pi 4
-- Created platform version manager
+### Raspberry Pi 5
+- `rpi5-system-info`
+- `rpi-system-info`
+- `uart-test`
+- `spi-test`
+- `spi-speed-test`

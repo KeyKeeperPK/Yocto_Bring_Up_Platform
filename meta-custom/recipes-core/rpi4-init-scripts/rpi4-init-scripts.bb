@@ -1,17 +1,14 @@
-SUMMARY = "Custom Raspberry Pi 4/5 hardware interface initialization scripts"
-DESCRIPTION = "Scripts to initialize and configure SSH, WiFi, Ethernet, Docker, CAN, CAN-FD, UART, SPI, and Ethernet on Raspberry Pi 4 and Raspberry Pi 5"
+SUMMARY = "Custom Raspberry Pi 4 hardware interface initialization scripts"
+DESCRIPTION = "Scripts to initialize and configure SSH, WiFi, Ethernet, Docker, CAN, CAN-FD, UART, and SPI on Raspberry Pi 4"
 LICENSE = "MIT"
 LIC_FILES_CHKSUM = "file://${COMMON_LICENSE_DIR}/MIT;md5=0835ade698e0bcf8506ecda2f7b4f302"
 
-RDEPENDS:${PN} = "bash wpa-supplicant can-utils"
-RDEPENDS:${PN}:append:raspberrypi4-64 = " docker-ce"
-RDEPENDS:${PN}:append:raspberrypi5 = " docker-moby"
+RDEPENDS:${PN} = "bash docker-ce wpa-supplicant can-utils"
 
-# Version with patch support
 PV = "1.0.0"
 PR = "r0"
 
-COMPATIBLE_MACHINE = "(raspberrypi4-64|raspberrypi5)"
+COMPATIBLE_MACHINE = "raspberrypi4-64"
 
 FILESEXTRAPATHS:prepend := "${THISDIR}/${PN}:"
 
@@ -36,21 +33,17 @@ do_install() {
     install -d ${D}${bindir}
     install -d ${D}${systemd_unitdir}/system
     install -d ${D}${sysconfdir}/rpi4
-    
-    # Install scripts with rpi4 prefix
+
     install -m 0755 ${WORKDIR}/rpi4-hardware-init.sh ${D}${bindir}/
     install -m 0755 ${WORKDIR}/rpi4-can-setup.sh ${D}${bindir}/
     install -m 0755 ${WORKDIR}/rpi4-uart-setup.sh ${D}${bindir}/
     install -m 0755 ${WORKDIR}/rpi4-spi-setup.sh ${D}${bindir}/
-    
-    # Install systemd service
+
     install -m 0644 ${WORKDIR}/rpi4-hardware-init.service ${D}${systemd_unitdir}/system/
 
-    # tmpfiles.d
     install -d ${D}${sysconfdir}/tmpfiles.d
     install -m 0644 ${WORKDIR}/rpi4-hardware-init.tmpfiles ${D}${sysconfdir}/tmpfiles.d/
-    
-    # Create RPi4 configuration directory
+
     echo "Raspberry Pi 4 Industrial Configuration v${PV}-${PR}" > ${D}${sysconfdir}/rpi4/version
     echo "Features: SSH, WiFi, Docker, CAN-FD, UART, SPI, Ethernet" >> ${D}${sysconfdir}/rpi4/version
 }

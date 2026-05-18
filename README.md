@@ -5,7 +5,6 @@ This repository contains the Yocto Project setup for building custom Linux image
 - **BeagleBone** (ARM Cortex-A8)
 - **Raspberry Pi 4** (ARM Cortex-A72 64-bit)
 - **Raspberry Pi 5** (ARM Cortex-A76 64-bit)
-- **Raspberry Pi 5 Bare** (baseline boot validation profile)
 - **NVIDIA Jetson Nano** (ARM Cortex-A57 with GPU acceleration)
 
 ## Release Direction
@@ -25,7 +24,6 @@ The Jetson Nano path is not included in that branch switch yet. It is still tied
   - `beaglebone/` - BeagleBone configuration
   - `raspberrypi4/` - Raspberry Pi 4 configuration
   - `raspberrypi5/` - Raspberry Pi 5 configuration
-  - `raspberrypi5bare/` - Raspberry Pi 5 baseline boot configuration
   - `jetson-nano/` - Jetson Nano configuration
 - `build-[platform]/` - Build directories (excluded from Git)
 
@@ -81,12 +79,6 @@ The Jetson Nano path is not included in that branch switch yet. It is still tied
 - **Architecture**: ARM Cortex-A76 64-bit
 - **Features**: Higher CPU performance, PCIe, WiFi/Bluetooth, hardware interfaces
 - **Build directory**: `build-raspberrypi5/`
-
-### Raspberry Pi 5 Bare
-- **Target**: `raspberrypi5`
-- **Architecture**: ARM Cortex-A76 64-bit
-- **Features**: Minimal Pi 5 boot-validation profile without the shared RPi4 init scripts
-- **Build directory**: `build-raspberrypi5bare/`
 
 ### NVIDIA Jetson Nano
 - **Target**: `jetson-nano-devkit`

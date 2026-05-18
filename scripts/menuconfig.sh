@@ -50,11 +50,10 @@ show_platform_menu() {
     echo "  1) BeagleBone Black/Green"
     echo "  2) Raspberry Pi 4 64-bit"
     echo "  3) Raspberry Pi 5 64-bit"
-    echo "  4) Raspberry Pi 5 bare minimum"
-    echo "  5) NVIDIA Jetson Nano"
+    echo "  4) NVIDIA Jetson Nano"
     echo "  0) Back to Main Menu"
     echo ""
-    echo -n "Enter choice [0-5]: "
+    echo -n "Enter choice [0-4]: "
 }
 
 # Get platform name
@@ -63,8 +62,7 @@ get_platform() {
         1) echo "beaglebone" ;;
         2) echo "raspberrypi4" ;;
         3) echo "raspberrypi5" ;;
-        4) echo "raspberrypi5bare" ;;
-        5) echo "jetson-nano" ;;
+        4) echo "jetson-nano" ;;
         *) echo "" ;;
     esac
 }

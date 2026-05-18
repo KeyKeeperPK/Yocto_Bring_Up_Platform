@@ -114,18 +114,16 @@ select_platform() {
     echo "  1) beaglebone"
     echo "  2) raspberrypi4"
     echo "  3) raspberrypi5"
-    echo "  4) raspberrypi5bare"
-    echo "  5) jetson-nano"
+    echo "  4) jetson-nano"
     echo ""
-    printf "Select platform [1-5]: "
+    printf "Select platform [1-4]: "
     read -r choice
     
     case "$choice" in
         1) echo "beaglebone" ;;
         2) echo "raspberrypi4" ;;
         3) echo "raspberrypi5" ;;
-        4) echo "raspberrypi5bare" ;;
-        5) echo "jetson-nano" ;;
+        4) echo "jetson-nano" ;;
         *) echo "" ;;
     esac
 }
@@ -246,7 +244,7 @@ main() {
                 # Check build directories
                 echo ""
                 echo "Build Directories:"
-                for plt in beaglebone raspberrypi4 raspberrypi5 raspberrypi5bare jetson-nano; do
+                for plt in beaglebone raspberrypi4 raspberrypi5 jetson-nano; do
                     if [ -d "build-$plt" ]; then
                         echo "✓ build-$plt: Exists"
                     else
@@ -272,14 +270,14 @@ main() {
                 }
                 
                 case "$target" in
-                    "beaglebone"|"raspberrypi4"|"raspberrypi5"|"raspberrypi5bare"|"jetson-nano")
+                    "beaglebone"|"raspberrypi4"|"raspberrypi5"|"jetson-nano")
                         print_warning "Cleaning build-$target..."
                         rm -rf "build-$target"
                         print_success "✓ build-$target cleaned"
                         ;;
                     *)
                         echo "Usage: clean <platform>"
-                        echo "Platforms: beaglebone, raspberrypi4, raspberrypi5, raspberrypi5bare, jetson-nano"
+                        echo "Platforms: beaglebone, raspberrypi4, raspberrypi5, jetson-nano"
                         ;;
                 esac
                 ;;
@@ -311,7 +309,7 @@ main() {
                 echo "  version             - Show version"
                 echo "  help                - Show this help"
                 echo ""
-                echo "Platforms: beaglebone, raspberrypi4, raspberrypi5, raspberrypi5bare, jetson-nano"
+                echo "Platforms: beaglebone, raspberrypi4, raspberrypi5, jetson-nano"
                 echo ""
                 echo "For interactive menu: run without arguments"
                 ;;
@@ -400,7 +398,7 @@ main() {
                             print_info "Creating backup..."
                             backup_dir="config-backup-$(date +%Y%m%d-%H%M%S)"
                             mkdir -p "$backup_dir"
-                            for p in beaglebone raspberrypi4 raspberrypi5 raspberrypi5bare jetson-nano; do
+                            for p in beaglebone raspberrypi4 raspberrypi5 jetson-nano; do
                                 if [ -d "build-$p/conf" ]; then
                                     cp -r "build-$p/conf" "$backup_dir/$p/"
                                 fi
@@ -596,7 +594,7 @@ main() {
                 # Check build directories
                 echo ""
                 echo "Build Directories:"
-                for plt in beaglebone raspberrypi4 raspberrypi5 raspberrypi5bare jetson-nano; do
+                for plt in beaglebone raspberrypi4 raspberrypi5 jetson-nano; do
                     if [ -d "build-$plt" ]; then
                         echo "✓ build-$plt: Exists"
                     else

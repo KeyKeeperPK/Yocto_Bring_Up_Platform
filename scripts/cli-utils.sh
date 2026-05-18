@@ -127,7 +127,7 @@ system_doctor() {
     
     # Build directories
     print_subheader "Build Directories:"
-    for platform in beaglebone raspberrypi4 raspberrypi5 raspberrypi5bare jetson-nano; do
+    for platform in beaglebone raspberrypi4 raspberrypi5 jetson-nano; do
         if [ -d "build-$platform" ]; then
             local size=$(du -sh "build-$platform" 2>/dev/null | cut -f1)
             print_success "$platform: Configured ($size)"

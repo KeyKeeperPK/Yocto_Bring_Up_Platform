@@ -53,7 +53,7 @@ usage() {
     echo "Usage: $0 [OPTIONS]"
     echo ""
     echo "Options:"
-    echo "  -p, --platform PLATFORM    Platform: beaglebone, raspberrypi4, raspberrypi5, raspberrypi5bare, jetson-nano"
+    echo "  -p, --platform PLATFORM    Platform: beaglebone, raspberrypi4, raspberrypi5, jetson-nano"
     echo "  -d, --device DEVICE        Target device (e.g., /dev/sdb, /dev/mmcblk0)"
     echo "  -i, --image IMAGE          Image type (default: core-image-minimal)"
     echo "  -n, --no-bmap              Don't use bmaptool (manual dd)"
@@ -100,12 +100,12 @@ parse_args() {
 # Validate platform
 validate_platform() {
     case "$PLATFORM" in
-        beaglebone|raspberrypi4|raspberrypi5|raspberrypi5bare|jetson-nano)
+        beaglebone|raspberrypi4|raspberrypi5|jetson-nano)
             return 0
             ;;
         *)
             print_error "Invalid platform: $PLATFORM"
-            print_info "Valid platforms: beaglebone, raspberrypi4, raspberrypi5, raspberrypi5bare, jetson-nano"
+            print_info "Valid platforms: beaglebone, raspberrypi4, raspberrypi5, jetson-nano"
             exit 1
             ;;
     esac
@@ -121,9 +121,6 @@ get_machine_name() {
             echo "raspberrypi4-64"
             ;;
         raspberrypi5)
-            echo "raspberrypi5"
-            ;;
-        raspberrypi5bare)
             echo "raspberrypi5"
             ;;
         jetson-nano)
@@ -178,13 +175,7 @@ unmount_device() {
 # Find image file
 find_image() {
     local machine=$(get_machine_name)
-    local build_platform="$PLATFORM"
-
-    if [[ "$PLATFORM" == "raspberrypi5bare" ]]; then
-        build_platform="raspberrypi5"
-    fi
-
-    local build_dir="$PROJECT_ROOT/build-$build_platform"
+    local build_dir="$PROJECT_ROOT/build-$PLATFORM"
     local deploy_dir="$build_dir/tmp/deploy/images/$machine"
     
     if [[ ! -d "$deploy_dir" ]]; then
@@ -298,17 +289,15 @@ interactive_mode() {
         echo "  1) BeagleBone Black/Green"
         echo "  2) Raspberry Pi 4 64-bit"
         echo "  3) Raspberry Pi 5 64-bit"
-        echo "  4) Raspberry Pi 5 bare minimum"
-        echo "  5) NVIDIA Jetson Nano"
+        echo "  4) NVIDIA Jetson Nano"
         echo ""
-        read -p "Enter choice [1-5]: " choice
+        read -p "Enter choice [1-4]: " choice
         
         case $choice in
             1) PLATFORM="beaglebone" ;;
             2) PLATFORM="raspberrypi4" ;;
             3) PLATFORM="raspberrypi5" ;;
-            4) PLATFORM="raspberrypi5bare" ;;
-            5) PLATFORM="jetson-nano" ;;
+            4) PLATFORM="jetson-nano" ;;
             *) print_error "Invalid choice"; exit 1 ;;
         esac
     fi

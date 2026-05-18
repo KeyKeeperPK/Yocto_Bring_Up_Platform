@@ -10,20 +10,6 @@ log_message() {
     echo "$(date): RPI-HARDWARE-INIT: $1" | tee -a "$LOG_FILE"
 }
 
-enable_and_start_first_available() {
-    for unit in "$@"; do
-        if systemctl list-unit-files | grep -q "^${unit}[[:space:]]"; then
-            systemctl enable "$unit" 2>/dev/null || true
-            systemctl start "$unit" 2>/dev/null || true
-            log_message "Enabled and started service: $unit"
-            return 0
-        fi
-    done
-
-    log_message "No matching systemd unit found from: $*"
-    return 1
-}
-
 # Ensure log directory exists
 mkdir -p "$(dirname "$LOG_FILE")"
 
@@ -48,8 +34,10 @@ SCRIPT_DIR="$(dirname "$0")"
 
 log_message "Configuring network interfaces..."
 
-# Enable SSH using the systemd unit available in this Yocto release.
-enable_and_start_first_available sshd.service sshd.socket ssh.service
+# Enable SSH service
+systemctl enable ssh
+systemctl start ssh
+log_message "SSH service enabled and started"
 
 # Configure Ethernet interface
 if ip link show eth0 >/dev/null 2>&1; then
@@ -96,24 +84,6 @@ if systemctl list-unit-files | grep -q docker.service; then
     systemctl enable docker
     systemctl start docker
     log_message "Docker service enabled and started"
-    
-    # Docker optimization for Raspberry Pi 4/5
-    mkdir -p /etc/docker
-    cat > /etc/docker/daemon.json << 'EOF'
-{
-    "storage-driver": "overlay2",
-    "log-driver": "json-file",
-    "log-opts": {
-        "max-size": "10m",
-        "max-file": "3"
-    },
-    "max-concurrent-downloads": 3,
-    "max-concurrent-uploads": 3,
-    "default-runtime": "runc"
-}
-EOF
-    systemctl restart docker
-    log_message "Docker daemon optimized and restarted"
     
     # Add users to docker group
     for user in pi root; do
@@ -176,12 +146,11 @@ for service in "${DISABLE_SERVICES[@]}"; do
     fi
 done
 
-# Keep this init script from forcing a network backend.
-# The image configuration decides whether NetworkManager or systemd-networkd
-# owns the interfaces, and Pi 5 currently uses NetworkManager.
+# Enable essential services
 ENABLE_SERVICES=(
-    "sshd.service"
-    "sshd.socket"
+    "systemd-networkd.service"
+    "systemd-resolved.service"
+    "ntp.service"
     "ssh.service"
 )
 
@@ -222,7 +191,7 @@ done
 log_message "Setting up monitoring and diagnostics..."
 
 # Create system info script
-cat > /usr/local/bin/rpi-system-info <<'EOF'
+cat > /usr/local/bin/rpi4-system-info <<'EOF'
 #!/bin/bash
 # Raspberry Pi 4/5 System Information
 
@@ -272,12 +241,11 @@ df -h / /boot
 echo ""
 
 echo "===== Services ====="
-systemctl status sshd.service sshd.socket ssh.service docker --no-pager -l 2>/dev/null || true
+systemctl status ssh docker --no-pager -l
 EOF
 
-chmod +x /usr/local/bin/rpi-system-info
-ln -sf /usr/local/bin/rpi-system-info /usr/local/bin/rpi4-system-info
-log_message "Created system info utility: rpi-system-info"
+chmod +x /usr/local/bin/rpi4-system-info
+log_message "Created system info utility: rpi4-system-info"
 
 # ===================================================================
 # COMPLETION
@@ -299,7 +267,7 @@ log_message "  ✓ I2C and GPIO access"
 
 log_message ""
 log_message "Available utilities:"
-log_message "  - rpi-system-info: System status and diagnostics"
+log_message "  - rpi4-system-info: System status and diagnostics"
 log_message "  - uart-test: UART interface testing"
 log_message "  - spi-test: SPI interface testing"  
 log_message "  - spi-speed-test: SPI speed benchmarking"
